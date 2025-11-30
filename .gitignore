@@ -1,0 +1,62 @@
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/**/xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+**/xcuserdata/
+**/*.xcuserstate
+**/*.xcuserdatad/
+
+# Build
+.DS_Store
+.build/
+**/.build/
+build/
+Build/
+**/build/
+**/Build/
+DerivedData/
+
+# Secrets - DO NOT COMMIT TO GIT!
+secrets/
+*.pem
+*.key
+*.secret
+config.secrets.json
+GITHUB_APP_SECRETS.json
+.env
+.env.local
+.env.*.local
+Secrets.xcconfig
+**/Secrets.xcconfig
+
+# Private keys
+**/private-key*.pem
+**/*private*.pem
+
+# Swift Package Manager
+.swiftpm/
+**/.swiftpm/
+.swiftpm/xcode/xcuserdata/
+**/.swiftpm/xcode/xcuserdata/
+
+# Testing
+*.xcresult
+
+# Debug
+Debug/
+debug/
+.debug/
+*.log
+*.dSYM
+*.dSYM.zip
+lldb/
+*.lldbinit
+
+# Documentation (exclude all .md files in root except README.md)
+/*.md
+!/README.md
+

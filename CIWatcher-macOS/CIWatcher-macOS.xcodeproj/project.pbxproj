@@ -1,0 +1,785 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EB0628F82EDC31810060FBB7 /* SharedCore in Frameworks */ = {isa = PBXBuildFile; productRef = EB0628F72EDC31810060FBB7 /* SharedCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EB0628A12EDC2F2B0060FBB7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB06288A2EDC2F290060FBB7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB0628912EDC2F290060FBB7;
+			remoteInfo = "CIWatcher-macOS";
+		};
+		EB0628AB2EDC2F2B0060FBB7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB06288A2EDC2F290060FBB7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB0628912EDC2F290060FBB7;
+			remoteInfo = "CIWatcher-macOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		EB0628922EDC2F290060FBB7 /* CIWatcher-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CIWatcher-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB0628A02EDC2F2B0060FBB7 /* CIWatcher-macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CIWatcher-macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB0628AA2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CIWatcher-macOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB0629C72EDCB10F0060FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EB0629C82EDCB10F0060FBB7 /* CIWatcher_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_iOSApp.swift; sourceTree = "<group>"; };
+		EB0629C92EDCB10F0060FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EB0629CB2EDCB10F0060FBB7 /* CIWatcher_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_iOSTests.swift; sourceTree = "<group>"; };
+		EB0629CD2EDCB10F0060FBB7 /* CIWatcher_iOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_iOSUITests.swift; sourceTree = "<group>"; };
+		EB0629CE2EDCB10F0060FBB7 /* CIWatcher_iOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_iOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		EB0629D02EDCB10F0060FBB7 /* CIWatcher-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "CIWatcher-iOS.xcodeproj"; sourceTree = "<group>"; };
+		EB0629D22EDCB10F0060FBB7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		EB0629D32EDCB10F0060FBB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EB0629D42EDCB10F0060FBB7 /* CIWatcher_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CIWatcher_macOS.entitlements; sourceTree = "<group>"; };
+		EB0629D52EDCB10F0060FBB7 /* CIWatcher_macOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_macOSApp.swift; sourceTree = "<group>"; };
+		EB0629D62EDCB10F0060FBB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EB0629D72EDCB10F0060FBB7 /* GitHubAppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAppSettingsView.swift; sourceTree = "<group>"; };
+		EB0629D82EDCB10F0060FBB7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EB0629D92EDCB10F0060FBB7 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		EB0629DA2EDCB10F0060FBB7 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		EB0629DC2EDCB10F0060FBB7 /* CIWatcher_macOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_macOSTests.swift; sourceTree = "<group>"; };
+		EB0629DE2EDCB10F0060FBB7 /* CIWatcher_macOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_macOSUITests.swift; sourceTree = "<group>"; };
+		EB0629DF2EDCB10F0060FBB7 /* CIWatcher_macOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIWatcher_macOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		EB0629E12EDCB10F0060FBB7 /* CIWatcher-macOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "CIWatcher-macOS.xcodeproj"; sourceTree = "<group>"; };
+		EB0629E52EDCB10F0060FBB7 /* .env */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env; sourceTree = "<group>"; };
+		EB0629E62EDCB10F0060FBB7 /* .env.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env.example; sourceTree = "<group>"; };
+		EB0629E72EDCB10F0060FBB7 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		EB0629E82EDCB10F0060FBB7 /* APP_STORE_DEPLOYMENT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = APP_STORE_DEPLOYMENT.md; sourceTree = "<group>"; };
+		EB0629E92EDCB10F0060FBB7 /* CIWatcher.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = CIWatcher.xcworkspace; sourceTree = "<group>"; };
+		EB0629EA2EDCB10F0060FBB7 /* CIWatcher_DEVELOPMENT_GUIDELINES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CIWatcher_DEVELOPMENT_GUIDELINES.md; sourceTree = "<group>"; };
+		EB0629EB2EDCB10F0060FBB7 /* GITHUB_APP_CONFIG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GITHUB_APP_CONFIG.md; sourceTree = "<group>"; };
+		EB0629EC2EDCB10F0060FBB7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		EB0629ED2EDCB10F0060FBB7 /* SECRETS_MANAGEMENT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SECRETS_MANAGEMENT.md; sourceTree = "<group>"; };
+		EB0629EE2EDCB10F0060FBB7 /* SharedCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SharedCore; sourceTree = "<group>"; };
+		EB0629EF2EDCB10F0060FBB7 /* WEBHOOK_INFO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = WEBHOOK_INFO.md; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "CIWatcher-macOS";
+			sourceTree = "<group>";
+		};
+		EB0628A32EDC2F2B0060FBB7 /* CIWatcher-macOSTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "CIWatcher-macOSTests";
+			sourceTree = "<group>";
+		};
+		EB0628AD2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "CIWatcher-macOSUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EB06288F2EDC2F290060FBB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB0628F82EDC31810060FBB7 /* SharedCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB06289D2EDC2F2B0060FBB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB0628A72EDC2F2B0060FBB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EB0628892EDC2F290060FBB7 = {
+			isa = PBXGroup;
+			children = (
+				EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */,
+				EB0628A32EDC2F2B0060FBB7 /* CIWatcher-macOSTests */,
+				EB0628AD2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests */,
+				EB0628F62EDC31810060FBB7 /* Frameworks */,
+				EB0628932EDC2F290060FBB7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EB0628932EDC2F290060FBB7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EB0628922EDC2F290060FBB7 /* CIWatcher-macOS.app */,
+				EB0628A02EDC2F2B0060FBB7 /* CIWatcher-macOSTests.xctest */,
+				EB0628AA2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB0628F62EDC31810060FBB7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629F02EDCB10F0060FBB7 /* macos_ci_watcher */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EB0629CA2EDCB10F0060FBB7 /* CIWatcher-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629C72EDCB10F0060FBB7 /* Assets.xcassets */,
+				EB0629C82EDCB10F0060FBB7 /* CIWatcher_iOSApp.swift */,
+				EB0629C92EDCB10F0060FBB7 /* ContentView.swift */,
+			);
+			path = "CIWatcher-iOS";
+			sourceTree = "<group>";
+		};
+		EB0629CC2EDCB10F0060FBB7 /* CIWatcher-iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629CB2EDCB10F0060FBB7 /* CIWatcher_iOSTests.swift */,
+			);
+			path = "CIWatcher-iOSTests";
+			sourceTree = "<group>";
+		};
+		EB0629CF2EDCB10F0060FBB7 /* CIWatcher-iOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629CD2EDCB10F0060FBB7 /* CIWatcher_iOSUITests.swift */,
+				EB0629CE2EDCB10F0060FBB7 /* CIWatcher_iOSUITestsLaunchTests.swift */,
+			);
+			path = "CIWatcher-iOSUITests";
+			sourceTree = "<group>";
+		};
+		EB0629D12EDCB10F0060FBB7 /* CIWatcher-iOS */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629CA2EDCB10F0060FBB7 /* CIWatcher-iOS */,
+				EB0629CC2EDCB10F0060FBB7 /* CIWatcher-iOSTests */,
+				EB0629CF2EDCB10F0060FBB7 /* CIWatcher-iOSUITests */,
+				EB0629D02EDCB10F0060FBB7 /* CIWatcher-iOS.xcodeproj */,
+			);
+			path = "CIWatcher-iOS";
+			sourceTree = "<group>";
+		};
+		EB0629DB2EDCB10F0060FBB7 /* CIWatcher-macOS */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629D22EDCB10F0060FBB7 /* AppDelegate.swift */,
+				EB0629D32EDCB10F0060FBB7 /* Assets.xcassets */,
+				EB0629D42EDCB10F0060FBB7 /* CIWatcher_macOS.entitlements */,
+				EB0629D52EDCB10F0060FBB7 /* CIWatcher_macOSApp.swift */,
+				EB0629D62EDCB10F0060FBB7 /* ContentView.swift */,
+				EB0629D72EDCB10F0060FBB7 /* GitHubAppSettingsView.swift */,
+				EB0629D82EDCB10F0060FBB7 /* SettingsView.swift */,
+				EB0629D92EDCB10F0060FBB7 /* SettingsViewModel.swift */,
+				EB0629DA2EDCB10F0060FBB7 /* StatusBarController.swift */,
+			);
+			path = "CIWatcher-macOS";
+			sourceTree = "<group>";
+		};
+		EB0629DD2EDCB10F0060FBB7 /* CIWatcher-macOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629DC2EDCB10F0060FBB7 /* CIWatcher_macOSTests.swift */,
+			);
+			path = "CIWatcher-macOSTests";
+			sourceTree = "<group>";
+		};
+		EB0629E02EDCB10F0060FBB7 /* CIWatcher-macOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629DE2EDCB10F0060FBB7 /* CIWatcher_macOSUITests.swift */,
+				EB0629DF2EDCB10F0060FBB7 /* CIWatcher_macOSUITestsLaunchTests.swift */,
+			);
+			path = "CIWatcher-macOSUITests";
+			sourceTree = "<group>";
+		};
+		EB0629E22EDCB10F0060FBB7 /* CIWatcher-macOS */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629DB2EDCB10F0060FBB7 /* CIWatcher-macOS */,
+				EB0629DD2EDCB10F0060FBB7 /* CIWatcher-macOSTests */,
+				EB0629E02EDCB10F0060FBB7 /* CIWatcher-macOSUITests */,
+				EB0629E12EDCB10F0060FBB7 /* CIWatcher-macOS.xcodeproj */,
+			);
+			path = "CIWatcher-macOS";
+			sourceTree = "<group>";
+		};
+		EB0629E32EDCB10F0060FBB7 /* CIWatcherTests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = CIWatcherTests;
+			sourceTree = "<group>";
+		};
+		EB0629E42EDCB10F0060FBB7 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = scripts;
+			sourceTree = "<group>";
+		};
+		EB0629F02EDCB10F0060FBB7 /* macos_ci_watcher */ = {
+			isa = PBXGroup;
+			children = (
+				EB0629D12EDCB10F0060FBB7 /* CIWatcher-iOS */,
+				EB0629E22EDCB10F0060FBB7 /* CIWatcher-macOS */,
+				EB0629E32EDCB10F0060FBB7 /* CIWatcherTests */,
+				EB0629E42EDCB10F0060FBB7 /* scripts */,
+				EB0629E52EDCB10F0060FBB7 /* .env */,
+				EB0629E62EDCB10F0060FBB7 /* .env.example */,
+				EB0629E72EDCB10F0060FBB7 /* .gitignore */,
+				EB0629E82EDCB10F0060FBB7 /* APP_STORE_DEPLOYMENT.md */,
+				EB0629E92EDCB10F0060FBB7 /* CIWatcher.xcworkspace */,
+				EB0629EA2EDCB10F0060FBB7 /* CIWatcher_DEVELOPMENT_GUIDELINES.md */,
+				EB0629EB2EDCB10F0060FBB7 /* GITHUB_APP_CONFIG.md */,
+				EB0629EC2EDCB10F0060FBB7 /* README.md */,
+				EB0629ED2EDCB10F0060FBB7 /* SECRETS_MANAGEMENT.md */,
+				EB0629EE2EDCB10F0060FBB7 /* SharedCore */,
+				EB0629EF2EDCB10F0060FBB7 /* WEBHOOK_INFO.md */,
+			);
+			name = macos_ci_watcher;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		EB0629F12EDCB10F0060FBB7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB0629F32EDCB10F0060FBB7 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EB0628912EDC2F290060FBB7 /* CIWatcher-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB0628B42EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOS" */;
+			buildPhases = (
+				EB06288E2EDC2F290060FBB7 /* Sources */,
+				EB06288F2EDC2F290060FBB7 /* Frameworks */,
+				EB0628902EDC2F290060FBB7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */,
+			);
+			name = "CIWatcher-macOS";
+			packageProductDependencies = (
+				EB0628F72EDC31810060FBB7 /* SharedCore */,
+			);
+			productName = "CIWatcher-macOS";
+			productReference = EB0628922EDC2F290060FBB7 /* CIWatcher-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EB06289F2EDC2F2B0060FBB7 /* CIWatcher-macOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB0628B72EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOSTests" */;
+			buildPhases = (
+				EB06289C2EDC2F2B0060FBB7 /* Sources */,
+				EB06289D2EDC2F2B0060FBB7 /* Frameworks */,
+				EB06289E2EDC2F2B0060FBB7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EB0628A22EDC2F2B0060FBB7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EB0628A32EDC2F2B0060FBB7 /* CIWatcher-macOSTests */,
+			);
+			name = "CIWatcher-macOSTests";
+			packageProductDependencies = (
+			);
+			productName = "CIWatcher-macOSTests";
+			productReference = EB0628A02EDC2F2B0060FBB7 /* CIWatcher-macOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EB0628A92EDC2F2B0060FBB7 /* CIWatcher-macOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB0628BA2EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOSUITests" */;
+			buildPhases = (
+				EB0628A62EDC2F2B0060FBB7 /* Sources */,
+				EB0628A72EDC2F2B0060FBB7 /* Frameworks */,
+				EB0628A82EDC2F2B0060FBB7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EB0628AC2EDC2F2B0060FBB7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EB0628AD2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests */,
+			);
+			name = "CIWatcher-macOSUITests";
+			packageProductDependencies = (
+			);
+			productName = "CIWatcher-macOSUITests";
+			productReference = EB0628AA2EDC2F2B0060FBB7 /* CIWatcher-macOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EB06288A2EDC2F290060FBB7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					EB0628912EDC2F290060FBB7 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					EB06289F2EDC2F2B0060FBB7 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = EB0628912EDC2F290060FBB7;
+					};
+					EB0628A92EDC2F2B0060FBB7 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = EB0628912EDC2F290060FBB7;
+					};
+				};
+			};
+			buildConfigurationList = EB06288D2EDC2F290060FBB7 /* Build configuration list for PBXProject "CIWatcher-macOS" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EB0628892EDC2F290060FBB7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EB0628F12EDC2F760060FBB7 /* XCLocalSwiftPackageReference "../SharedCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EB0628932EDC2F290060FBB7 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = EB0629F12EDCB10F0060FBB7 /* Products */;
+					ProjectRef = EB0629D02EDCB10F0060FBB7 /* CIWatcher-iOS.xcodeproj */;
+				},
+				{
+					ProductGroup = EB0629F32EDCB10F0060FBB7 /* Products */;
+					ProjectRef = EB0629E12EDCB10F0060FBB7 /* CIWatcher-macOS.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				EB0628912EDC2F290060FBB7 /* CIWatcher-macOS */,
+				EB06289F2EDC2F2B0060FBB7 /* CIWatcher-macOSTests */,
+				EB0628A92EDC2F2B0060FBB7 /* CIWatcher-macOSUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EB0628902EDC2F290060FBB7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB06289E2EDC2F2B0060FBB7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB0628A82EDC2F2B0060FBB7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EB06288E2EDC2F290060FBB7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB06289C2EDC2F2B0060FBB7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB0628A62EDC2F2B0060FBB7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EB0628A22EDC2F2B0060FBB7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB0628912EDC2F290060FBB7 /* CIWatcher-macOS */;
+			targetProxy = EB0628A12EDC2F2B0060FBB7 /* PBXContainerItemProxy */;
+		};
+		EB0628AC2EDC2F2B0060FBB7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB0628912EDC2F290060FBB7 /* CIWatcher-macOS */;
+			targetProxy = EB0628AB2EDC2F2B0060FBB7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EB0628B22EDC2F2B0060FBB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EB0628B32EDC2F2B0060FBB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		EB0628B52EDC2F2B0060FBB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = "CIWatcher-macOS/CIWatcher_macOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+			ENABLE_HARDENED_RUNTIME = YES;
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
+			INFOPLIST_KEY_NSHumanReadableCopyright = "";
+			INFOPLIST_PREPROCESS = YES;
+			LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/../Frameworks",
+			);
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			REGISTER_APP_GROUPS = YES;
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+		};
+		name = Debug;
+		};
+		EB0628B62EDC2F2B0060FBB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = "CIWatcher-macOS/CIWatcher_macOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+			ENABLE_HARDENED_RUNTIME = YES;
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
+			INFOPLIST_KEY_NSHumanReadableCopyright = "";
+			INFOPLIST_PREPROCESS = YES;
+			LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/../Frameworks",
+			);
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			REGISTER_APP_GROUPS = YES;
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+		};
+		name = Release;
+		};
+		EB0628B82EDC2F2B0060FBB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CIWatcher-macOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CIWatcher-macOS";
+			};
+			name = Debug;
+		};
+		EB0628B92EDC2F2B0060FBB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOSTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CIWatcher-macOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CIWatcher-macOS";
+			};
+			name = Release;
+		};
+		EB0628BB2EDC2F2B0060FBB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "CIWatcher-macOS";
+			};
+			name = Debug;
+		};
+		EB0628BC2EDC2F2B0060FBB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = EB0628942EDC2F290060FBB7 /* CIWatcher-macOS */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6YATHLR4YS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOSUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "CIWatcher-macOS";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EB06288D2EDC2F290060FBB7 /* Build configuration list for PBXProject "CIWatcher-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB0628B22EDC2F2B0060FBB7 /* Debug */,
+				EB0628B32EDC2F2B0060FBB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB0628B42EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB0628B52EDC2F2B0060FBB7 /* Debug */,
+				EB0628B62EDC2F2B0060FBB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB0628B72EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB0628B82EDC2F2B0060FBB7 /* Debug */,
+				EB0628B92EDC2F2B0060FBB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB0628BA2EDC2F2B0060FBB7 /* Build configuration list for PBXNativeTarget "CIWatcher-macOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB0628BB2EDC2F2B0060FBB7 /* Debug */,
+				EB0628BC2EDC2F2B0060FBB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EB0628F12EDC2F760060FBB7 /* XCLocalSwiftPackageReference "../SharedCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../SharedCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EB0628F72EDC31810060FBB7 /* SharedCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB0628F12EDC2F760060FBB7 /* XCLocalSwiftPackageReference "../SharedCore" */;
+			productName = SharedCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EB06288A2EDC2F290060FBB7 /* Project object */;
+}

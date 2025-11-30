@@ -1,0 +1,65 @@
+//
+//  SettingsView.swift
+//  CIWatcher-macOS
+//
+//  Created by Ivan Terekhov on 30.11.2025.
+//
+
+import SwiftUI
+import SharedCore
+
+struct SettingsView: View {
+    @StateObject private var viewModel = SettingsViewModel()
+    
+    var body: some View {
+        TabView {
+            GitHubAppSettingsView(viewModel: viewModel)
+                .tabItem {
+                    Label("GitHub App", systemImage: "app.badge")
+                }
+            
+            GeneralSettingsView()
+                .tabItem {
+                    Label("General", systemImage: "gear")
+                }
+        }
+        .frame(width: 600, height: 500)
+    }
+}
+
+struct GeneralSettingsView: View {
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")
+                        .foregroundColor(.secondary)
+                }
+                
+                HStack {
+                    Text("Build")
+                    Spacer()
+                    Text(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown")
+                        .foregroundColor(.secondary)
+                }
+            } header: {
+                Text("About")
+            }
+            
+            Section {
+                Link("GitHub Repository", destination: URL(string: "https://github.com/navel/ci-watcher")!)
+                Link("Documentation", destination: URL(string: "https://github.com/navel/ci-watcher")!)
+            } header: {
+                Text("Resources")
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+#Preview {
+    SettingsView()
+}
+
