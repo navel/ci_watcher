@@ -29,6 +29,11 @@ struct SettingsView: View {
                     Label("Repositories", systemImage: "folder.fill")
                 }
             
+            NotificationSettingsView(notificationEngine: NotificationEngine.shared)
+                .tabItem {
+                    Label("Notifications", systemImage: "bell")
+                }
+            
             GeneralSettingsView()
                 .tabItem {
                     Label("General", systemImage: "gear")

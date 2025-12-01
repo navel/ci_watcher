@@ -123,6 +123,12 @@ public class CIService: ObservableObject {
                     perPage: 10
                 )
                 workflowRuns[repository.id] = response.workflowRuns
+                
+                // Обрабатываем уведомления для этого репозитория
+                await NotificationEngine.shared.processWorkflowRuns(
+                    for: repository,
+                    workflowRuns: response.workflowRuns
+                )
             } catch {
                 lastError = error
                 // Continue with other repositories even if one fails
@@ -147,6 +153,12 @@ public class CIService: ObservableObject {
                 perPage: 10
             )
             workflowRuns[repository.id] = response.workflowRuns
+            
+            // Обрабатываем уведомления для этого репозитория
+            await NotificationEngine.shared.processWorkflowRuns(
+                for: repository,
+                workflowRuns: response.workflowRuns
+            )
         } catch {
             lastError = error
         }

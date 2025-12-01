@@ -22,6 +22,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         
         Task { @MainActor in
+            // Request notification permissions
+            _ = await NotificationEngine.shared.requestAuthorization()
+            
             // Update ContentView with CI service
             statusBar.updateContentView(ContentView(ciService: ciService))
             
