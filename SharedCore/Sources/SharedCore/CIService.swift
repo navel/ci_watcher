@@ -8,12 +8,31 @@ public class CIService: ObservableObject {
     @Published public private(set) var isLoading: Bool = false
     @Published public private(set) var lastError: Error?
     
-    private let apiClient: GitHubAPIClient
+    private var apiClient: GitHubAPIClient?
     private var pollingTimer: Timer?
     private let pollingInterval: TimeInterval = 60.0 // 60 seconds
+    private let repositoriesKey = "CIWatcher.TrackedRepositories"
     
-    public init(token: String) {
-        self.apiClient = GitHubAPIClient(token: token)
+    public init() {
+        loadRepositories()
+    }
+    
+    // MARK: - Authentication
+    
+    public var hasAPIClient: Bool {
+        apiClient != nil
+    }
+    
+    public func setAPIClient(_ client: GitHubAPIClient) {
+        self.apiClient = client
+    }
+    
+    public func updateAPIClient(config: GitHubAppConfig, installationID: Int? = nil) async throws {
+        let client = try await GitHubAPIClient.withGitHubApp(
+            config: config,
+            installationID: installationID
+        )
+        self.apiClient = client
     }
     
     // MARK: - Repository Management
@@ -21,12 +40,30 @@ public class CIService: ObservableObject {
     public func addRepository(_ repository: CIRepository) {
         if !repositories.contains(where: { $0.id == repository.id }) {
             repositories.append(repository)
+            saveRepositories()
         }
     }
     
     public func removeRepository(_ repository: CIRepository) {
         repositories.removeAll { $0.id == repository.id }
         workflowRuns.removeValue(forKey: repository.id)
+        saveRepositories()
+    }
+    
+    // MARK: - Persistence
+    
+    private func saveRepositories() {
+        if let encoded = try? JSONEncoder().encode(repositories) {
+            UserDefaults.standard.set(encoded, forKey: repositoriesKey)
+        }
+    }
+    
+    private func loadRepositories() {
+        guard let data = UserDefaults.standard.data(forKey: repositoriesKey),
+              let decoded = try? JSONDecoder().decode([CIRepository].self, from: data) else {
+            return
+        }
+        repositories = decoded
     }
     
     // MARK: - Polling
@@ -56,7 +93,24 @@ public class CIService: ObservableObject {
     // MARK: - Fetching
     
     public func fetchAllWorkflowRuns() async {
-        guard !repositories.isEmpty else { return }
+        guard !repositories.isEmpty else {
+            return
+        }
+        
+        // Refresh API client to get a new installation token
+        // Installation tokens expire after 1 hour, so we refresh before each fetch
+        let config = GitHubAppConfig.default
+        if config.hasPrivateKey() {
+            do {
+                try await updateAPIClient(config: config)
+            } catch {
+                // Continue with existing client, it might still be valid
+            }
+        }
+        
+        guard let apiClient = apiClient else {
+            return
+        }
         
         isLoading = true
         lastError = nil
@@ -79,6 +133,10 @@ public class CIService: ObservableObject {
     }
     
     public func fetchWorkflowRuns(for repository: CIRepository) async {
+        guard let apiClient = apiClient else {
+            return
+        }
+        
         isLoading = true
         lastError = nil
         

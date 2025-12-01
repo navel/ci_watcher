@@ -52,6 +52,7 @@ public struct WorkflowRunsResponse: Codable {
 public struct WorkflowRunAPI: Codable {
     public let id: Int
     public let name: String
+    public let displayTitle: String?
     public let status: String
     public let conclusion: String?
     public let createdAt: String
@@ -59,6 +60,7 @@ public struct WorkflowRunAPI: Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case name
+        case displayTitle = "display_title"
         case status
         case conclusion
         case createdAt = "created_at"
@@ -69,12 +71,24 @@ public struct WorkflowRunAPI: Codable {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         guard let date = formatter.date(from: createdAt) else {
-            return nil
+            // Try without fractional seconds
+            let formatter2 = ISO8601DateFormatter()
+            formatter2.formatOptions = [.withInternetDateTime]
+            guard let date2 = formatter2.date(from: createdAt) else {
+                return nil
+            }
+            return WorkflowRun(
+                id: id,
+                name: displayTitle ?? name,
+                status: status,
+                conclusion: conclusion,
+                createdAt: date2
+            )
         }
         
         return WorkflowRun(
             id: id,
-            name: name,
+            name: displayTitle ?? name,
             status: status,
             conclusion: conclusion,
             createdAt: date
@@ -92,9 +106,10 @@ public struct WorkflowRunsAPIResponse: Codable {
     }
     
     func toWorkflowRunsResponse() -> WorkflowRunsResponse {
-        WorkflowRunsResponse(
+        let converted = workflowRuns.compactMap { $0.toWorkflowRun() }
+        return WorkflowRunsResponse(
             totalCount: totalCount,
-            workflowRuns: workflowRuns.compactMap { $0.toWorkflowRun() }
+            workflowRuns: converted
         )
     }
 }

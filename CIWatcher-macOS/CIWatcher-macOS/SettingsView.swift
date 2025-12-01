@@ -10,12 +10,23 @@ import SharedCore
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var repositoriesViewModel = RepositoriesViewModel()
+    @ObservedObject var ciService: CIService
+    
+    init(ciService: CIService) {
+        self.ciService = ciService
+    }
     
     var body: some View {
         TabView {
             GitHubAppSettingsView(viewModel: viewModel)
                 .tabItem {
                     Label("GitHub App", systemImage: "app.badge")
+                }
+            
+            RepositoriesSettingsView(viewModel: repositoriesViewModel, ciService: ciService)
+                .tabItem {
+                    Label("Repositories", systemImage: "folder.fill")
                 }
             
             GeneralSettingsView()
@@ -60,6 +71,6 @@ struct GeneralSettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(ciService: CIService())
 }
 

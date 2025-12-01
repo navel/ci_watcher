@@ -11,7 +11,7 @@ import SharedCore
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController?
-    var ciService: CIService?
+    @MainActor var ciService: CIService = CIService()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize status bar
@@ -22,14 +22,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         
         Task { @MainActor in
-            let service = CIService(token: "")
-            self.ciService = service
-            
             // Update ContentView with CI service
-            statusBar.updateContentView(ContentView(ciService: service))
+            statusBar.updateContentView(ContentView(ciService: ciService))
+            
+            // Try to initialize GitHub App authentication
+            await initializeGitHubAppAuth()
             
             // Start polling
-            service.startPolling()
+            ciService.startPolling()
             
             // Update status bar emoji periodically
             let statusTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
@@ -43,8 +43,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @MainActor
+    private func initializeGitHubAppAuth() async {
+        let config = GitHubAppConfig.default
+        guard config.hasPrivateKey() else {
+            return
+        }
+        
+        do {
+            try await ciService.updateAPIClient(config: config)
+            
+            // If there are saved repositories, fetch their workflow runs
+            if !ciService.repositories.isEmpty {
+                await ciService.fetchAllWorkflowRuns()
+            }
+        } catch {
+            // Silently fail - user can configure in settings
+        }
+    }
+    
     func applicationWillTerminate(_ notification: Notification) {
-        ciService?.stopPolling()
+        Task { @MainActor in
+            ciService.stopPolling()
+        }
     }
 }
 

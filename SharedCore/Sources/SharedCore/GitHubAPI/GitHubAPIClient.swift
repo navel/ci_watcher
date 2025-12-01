@@ -18,6 +18,9 @@ public class GitHubAPIClient {
         self.token = token
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
+        // Disable caching to ensure we always get fresh data
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
         self.session = URLSession(configuration: config)
     }
     
@@ -103,7 +106,9 @@ public class GitHubAPIClient {
         let data = try await makeRequest(endpoint: endpoint)
         
         do {
-            let apiResponse = try JSONDecoder().decode(WorkflowRunsAPIResponse.self, from: data)
+            // Don't use keyDecodingStrategy here because we have explicit CodingKeys
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(WorkflowRunsAPIResponse.self, from: data)
             return apiResponse.toWorkflowRunsResponse()
         } catch {
             throw GitHubAPIError.decodingError(error)

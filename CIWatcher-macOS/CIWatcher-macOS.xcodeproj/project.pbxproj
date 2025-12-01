@@ -597,24 +597,24 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 6YATHLR4YS;
-			ENABLE_HARDENED_RUNTIME = YES;
-			ENABLE_PREVIEWS = YES;
-			GENERATE_INFOPLIST_FILE = NO;
-			INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
-			INFOPLIST_KEY_NSHumanReadableCopyright = "";
-			INFOPLIST_PREPROCESS = YES;
-			LD_RUNPATH_SEARCH_PATHS = (
-				"$(inherited)",
-				"@executable_path/../Frameworks",
-			);
-			MARKETING_VERSION = 1.0;
-			PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
-			PRODUCT_NAME = "$(TARGET_NAME)";
-			REGISTER_APP_GROUPS = YES;
-			SWIFT_EMIT_LOC_STRINGS = YES;
-			SWIFT_VERSION = 5.0;
-		};
-		name = Debug;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_PREPROCESS = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
 		};
 		EB0628B62EDC2F2B0060FBB7 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -630,24 +630,24 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 6YATHLR4YS;
-			ENABLE_HARDENED_RUNTIME = YES;
-			ENABLE_PREVIEWS = YES;
-			GENERATE_INFOPLIST_FILE = NO;
-			INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
-			INFOPLIST_KEY_NSHumanReadableCopyright = "";
-			INFOPLIST_PREPROCESS = YES;
-			LD_RUNPATH_SEARCH_PATHS = (
-				"$(inherited)",
-				"@executable_path/../Frameworks",
-			);
-			MARKETING_VERSION = 1.0;
-			PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
-			PRODUCT_NAME = "$(TARGET_NAME)";
-			REGISTER_APP_GROUPS = YES;
-			SWIFT_EMIT_LOC_STRINGS = YES;
-			SWIFT_VERSION = 5.0;
-		};
-		name = Release;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "CIWatcher-macOS/Info.plist";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_PREPROCESS = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "navel.CIWatcher-macOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
 		};
 		EB0628B82EDC2F2B0060FBB7 /* Debug */ = {
 			isa = XCBuildConfiguration;

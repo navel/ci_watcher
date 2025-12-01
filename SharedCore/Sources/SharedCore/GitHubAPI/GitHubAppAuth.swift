@@ -121,6 +121,7 @@ public class GitHubAppAuth {
         request.httpMethod = "GET"
         request.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -161,6 +162,7 @@ public class GitHubAppAuth {
         request.setValue("Bearer \(jwt)", forHTTPHeaderField: "Authorization")
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -187,6 +189,56 @@ public class GitHubAppAuth {
         }
     }
     
+    /// Get repositories accessible by a specific installation
+    /// - Parameter installationID: The installation ID
+    /// - Returns: List of repositories accessible by the installation
+    public func getInstallationRepositories(installationID: Int) async throws -> InstallationRepositoriesResponse {
+        // First, get the installation token
+        let tokenResponse = try await getInstallationToken(installationID: installationID)
+        
+        // Then use the installation token to get repositories
+        // The endpoint /installation/repositories uses the installation token context
+        let endpoint = "/installation/repositories"
+        
+        guard let url = URL(string: "\(baseURL)\(endpoint)") else {
+            throw GitHubAppAuthError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(tokenResponse.token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw GitHubAppAuthError.invalidResponse
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                if httpResponse.statusCode == 401 {
+                    throw GitHubAppAuthError.unauthorized
+                }
+                throw GitHubAppAuthError.invalidResponse
+            }
+            
+            let decoder = JSONDecoder()
+            // Don't use keyDecodingStrategy here because we have explicit CodingKeys
+            do {
+                let apiResponse = try decoder.decode(InstallationRepositoriesAPIResponse.self, from: data)
+                return apiResponse.toInstallationRepositoriesResponse()
+            } catch {
+                throw GitHubAppAuthError.networkError(error)
+            }
+        } catch let error as GitHubAppAuthError {
+            throw error
+        } catch {
+            throw GitHubAppAuthError.networkError(error)
+        }
+    }
+    
 }
 
 // MARK: - Models
@@ -200,11 +252,17 @@ struct GitHubAppClaims: Claims {
 
 public struct InstallationToken: Codable {
     public let token: String
-    public let expiresAt: Date
+    public let expiresAt: Date?
     
     enum CodingKeys: String, CodingKey {
         case token
         case expiresAt = "expires_at"
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        token = try container.decode(String.self, forKey: .token)
+        expiresAt = try container.decodeIfPresent(Date.self, forKey: .expiresAt)
     }
 }
 
@@ -221,6 +279,84 @@ public struct Installation: Codable {
 public struct InstallationAccount: Codable {
     public let login: String
     public let type: String
+}
+
+// MARK: - Installation Repositories
+
+public struct InstallationRepositoriesResponse: Codable {
+    public let totalCount: Int
+    public let repositories: [InstallationRepository]
+    
+    enum CodingKeys: String, CodingKey {
+        case totalCount = "total_count"
+        case repositories
+    }
+}
+
+public struct InstallationRepository: Codable {
+    public let id: Int
+    public let name: String
+    public let fullName: String
+    public let `private`: Bool
+    public let owner: InstallationRepositoryOwner
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case fullName = "full_name"
+        case `private`
+        case owner
+    }
+}
+
+public struct InstallationRepositoryOwner: Codable {
+    public let login: String
+}
+
+// API Response Models
+struct InstallationRepositoriesAPIResponse: Codable {
+    let totalCount: Int
+    let repositories: [InstallationRepositoryAPI]
+    
+    enum CodingKeys: String, CodingKey {
+        case totalCount = "total_count"
+        case repositories
+    }
+    
+    func toInstallationRepositoriesResponse() -> InstallationRepositoriesResponse {
+        InstallationRepositoriesResponse(
+            totalCount: totalCount,
+            repositories: repositories.map { repo in
+                InstallationRepository(
+                    id: repo.id,
+                    name: repo.name,
+                    fullName: repo.fullName,
+                    private: repo.private,
+                    owner: InstallationRepositoryOwner(login: repo.owner.login)
+                )
+            }
+        )
+    }
+}
+
+struct InstallationRepositoryAPI: Codable {
+    let id: Int
+    let name: String
+    let fullName: String
+    let `private`: Bool
+    let owner: InstallationRepositoryOwnerAPI
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case fullName = "full_name"
+        case `private`
+        case owner
+    }
+}
+
+struct InstallationRepositoryOwnerAPI: Codable {
+    let login: String
 }
 
 public enum GitHubAppAuthError: Error, LocalizedError {

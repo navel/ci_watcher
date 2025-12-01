@@ -23,3 +23,4 @@ echo "Add this to your Secrets.xcconfig:"
 echo "GITHUB_PRIVATE_KEY = $(cat "$KEY_FILE" | base64 | tr -d '\n')"
 echo ""
 
+

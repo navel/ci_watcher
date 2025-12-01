@@ -22,6 +22,17 @@ struct ContentView: View {
                     if ciService.isLoading {
                         ProgressView()
                             .scaleEffect(0.5)
+                    } else {
+                        Button(action: {
+                            Task {
+                                await ciService.fetchAllWorkflowRuns()
+                            }
+                        }) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Refresh workflow runs")
                     }
                     SettingsLink {
                         Image(systemName: "gearshape.fill")
@@ -120,5 +131,5 @@ struct WorkflowRunRow: View {
 }
 
 #Preview {
-    ContentView(ciService: CIService(token: "test"))
+    ContentView(ciService: CIService())
 }

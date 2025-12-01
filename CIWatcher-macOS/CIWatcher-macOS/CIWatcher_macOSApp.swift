@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SharedCore
 
 @main
 struct CIWatcher_macOSApp: App {
@@ -13,7 +14,7 @@ struct CIWatcher_macOSApp: App {
     
     var body: some Scene {
         Settings {
-            SettingsView()
+            SettingsView(ciService: appDelegate.ciService)
         }
     }
 }
