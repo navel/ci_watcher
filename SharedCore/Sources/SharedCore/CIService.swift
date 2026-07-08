@@ -5,6 +5,8 @@ import Combine
 public class CIService: ObservableObject {
     @Published public private(set) var repositories: [CIRepository] = []
     @Published public private(set) var workflowRuns: [CIRepository.ID: [WorkflowRun]] = [:]
+    @Published public private(set) var workflowJobs: [WorkflowRunKey: [WorkflowJob]] = [:]
+    @Published public private(set) var loadingJobKeys: Set<WorkflowRunKey> = []
     @Published public private(set) var isLoading: Bool = false
     @Published public private(set) var lastError: Error?
     
@@ -47,6 +49,7 @@ public class CIService: ObservableObject {
     public func removeRepository(_ repository: CIRepository) {
         repositories.removeAll { $0.id == repository.id }
         workflowRuns.removeValue(forKey: repository.id)
+        workflowJobs = workflowJobs.filter { $0.key.repositoryId != repository.id }
         saveRepositories()
     }
     
@@ -164,6 +167,42 @@ public class CIService: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    // MARK: - Workflow Jobs
+    
+    public func jobs(for run: WorkflowRun, repository: CIRepository) -> [WorkflowJob]? {
+        workflowJobs[WorkflowRunKey(repositoryId: repository.id, runId: run.id)]
+    }
+    
+    public func isLoadingJobs(for run: WorkflowRun, repository: CIRepository) -> Bool {
+        loadingJobKeys.contains(WorkflowRunKey(repositoryId: repository.id, runId: run.id))
+    }
+    
+    public func fetchJobs(for run: WorkflowRun, repository: CIRepository, force: Bool = false) async {
+        let key = WorkflowRunKey(repositoryId: repository.id, runId: run.id)
+        
+        if !force, workflowJobs[key] != nil {
+            return
+        }
+        
+        guard let apiClient = apiClient else {
+            return
+        }
+        
+        loadingJobKeys.insert(key)
+        defer { loadingJobKeys.remove(key) }
+        
+        do {
+            let response = try await apiClient.getWorkflowRunJobs(
+                owner: repository.owner,
+                repo: repository.name,
+                runId: run.id
+            )
+            workflowJobs[key] = response.jobs
+        } catch {
+            lastError = error
+        }
     }
     
     // MARK: - Status Helpers

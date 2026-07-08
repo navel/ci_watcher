@@ -5,6 +5,7 @@
 //  Created by Ivan Terekhov on 30.11.2025.
 //
 
+import AppKit
 import SwiftUI
 import SharedCore
 
@@ -65,6 +66,7 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(ciService.repositories) { repository in
                             RepositoryView(
+                                ciService: ciService,
                                 repository: repository,
                                 workflowRuns: ciService.workflowRuns[repository.id] ?? []
                             )
@@ -79,8 +81,11 @@ struct ContentView: View {
 }
 
 struct RepositoryView: View {
+    @ObservedObject var ciService: CIService
     let repository: CIRepository
     let workflowRuns: [WorkflowRun]
+    
+    @State private var expandedRunKey: WorkflowRunKey?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -103,7 +108,13 @@ struct RepositoryView: View {
                     .foregroundColor(.secondary)
             } else {
                 ForEach(workflowRuns.prefix(5)) { run in
-                    WorkflowRunRow(run: run)
+                    WorkflowRunRow(
+                        ciService: ciService,
+                        repository: repository,
+                        run: run,
+                        isExpanded: expandedRunKey == WorkflowRunKey(repositoryId: repository.id, runId: run.id),
+                        onToggle: { toggleRun(run) }
+                    )
                 }
             }
         }
@@ -111,32 +122,132 @@ struct RepositoryView: View {
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(8)
     }
+    
+    private func toggleRun(_ run: WorkflowRun) {
+        let key = WorkflowRunKey(repositoryId: repository.id, runId: run.id)
+        
+        if expandedRunKey == key {
+            expandedRunKey = nil
+            return
+        }
+        
+        expandedRunKey = key
+        
+        Task {
+            await ciService.fetchJobs(
+                for: run,
+                repository: repository,
+                force: run.status == "in_progress" || run.status == "queued"
+            )
+        }
+    }
 }
 
 struct WorkflowRunRow: View {
+    @ObservedObject var ciService: CIService
+    let repository: CIRepository
     let run: WorkflowRun
+    let isExpanded: Bool
+    let onToggle: () -> Void
     
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(run.statusEmoji)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(run.workflowName)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                Text(run.name)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
+        VStack(alignment: .leading, spacing: 4) {
+            Button(action: onToggle) {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .frame(width: 10)
+                        .padding(.top, 3)
+                    
+                    Text(run.statusEmoji)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(run.workflowName)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(run.name)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                    
+                    Spacer(minLength: 8)
+                    
+                    Text(run.createdAt, style: .relative)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             
-            Spacer(minLength: 8)
-            
-            Text(run.createdAt, style: .relative)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if isExpanded {
+                jobsSection
+                    .padding(.leading, 32)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
         .padding(.vertical, 4)
+        .animation(.easeInOut(duration: 0.15), value: isExpanded)
+    }
+    
+    @ViewBuilder
+    private var jobsSection: some View {
+        if ciService.isLoadingJobs(for: run, repository: repository) {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .scaleEffect(0.5)
+                Text("Loading jobs...")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.leading, 8)
+            .padding(.vertical, 4)
+        } else if let jobs = ciService.jobs(for: run, repository: repository) {
+            if jobs.isEmpty {
+                Text("No jobs found")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 4)
+            } else {
+                ForEach(jobs) { job in
+                    WorkflowJobRow(job: job)
+                }
+            }
+        }
+    }
+}
+
+struct WorkflowJobRow: View {
+    let job: WorkflowJob
+    
+    var body: some View {
+        Button {
+            if let url = job.htmlURL {
+                NSWorkspace.shared.open(url)
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(job.statusEmoji)
+                    .font(.system(size: 9))
+                    .frame(width: 12, alignment: .center)
+                Text(job.name)
+                    .font(.caption2)
+                Spacer()
+                if job.htmlURL != nil {
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.leading, 8)
+        .padding(.vertical, 2)
+        .help(job.htmlURL?.absoluteString ?? "")
     }
 }
 

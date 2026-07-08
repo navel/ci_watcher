@@ -115,6 +115,24 @@ public class GitHubAPIClient {
         }
     }
     
+    public func getWorkflowRunJobs(
+        owner: String,
+        repo: String,
+        runId: Int
+    ) async throws -> WorkflowJobsResponse {
+        let endpoint = "/repos/\(owner)/\(repo)/actions/runs/\(runId)/jobs"
+        
+        let data = try await makeRequest(endpoint: endpoint)
+        
+        do {
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(WorkflowJobsAPIResponse.self, from: data)
+            return apiResponse.toWorkflowJobsResponse()
+        } catch {
+            throw GitHubAPIError.decodingError(error)
+        }
+    }
+    
     public func testConnection() async throws {
         // Test with a simple API call to verify token
         let endpoint = "/user"

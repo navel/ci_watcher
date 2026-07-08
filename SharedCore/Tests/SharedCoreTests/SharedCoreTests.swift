@@ -93,6 +93,50 @@ final class SharedCoreTests: XCTestCase {
         
         XCTAssertEqual(CIService.computeOverallStatus(from: runs), "success")
     }
+    
+    func testWorkflowJobStatusEmoji() {
+        let successJob = WorkflowJob(
+            id: 1,
+            name: "build",
+            status: "completed",
+            conclusion: "success",
+            htmlURL: nil
+        )
+        XCTAssertEqual(successJob.statusEmoji, "🟢")
+        
+        let failureJob = WorkflowJob(
+            id: 2,
+            name: "test",
+            status: "completed",
+            conclusion: "failure",
+            htmlURL: nil
+        )
+        XCTAssertEqual(failureJob.statusEmoji, "🔴")
+    }
+    
+    func testWorkflowJobAPIDecoding() throws {
+        let json = """
+        {
+          "jobs": [
+            {
+              "id": 85964934332,
+              "name": "test",
+              "status": "completed",
+              "conclusion": "success",
+              "html_url": "https://github.com/example/repo/actions/runs/1/job/2"
+            }
+          ]
+        }
+        """
+        
+        let response = try JSONDecoder().decode(WorkflowJobsAPIResponse.self, from: Data(json.utf8))
+        let jobs = response.toWorkflowJobsResponse().jobs
+        
+        XCTAssertEqual(jobs.count, 1)
+        XCTAssertEqual(jobs[0].name, "test")
+        XCTAssertEqual(jobs[0].statusEmoji, "🟢")
+        XCTAssertEqual(jobs[0].htmlURL?.absoluteString, "https://github.com/example/repo/actions/runs/1/job/2")
+    }
 }
 
 
