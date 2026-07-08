@@ -6,24 +6,19 @@ set -euo pipefail
 
 OUTPUT="${1:-CIWatcher-macOS/CIWatcher-macOS/Secrets.xcconfig}"
 
-required_vars=(
-  GITHUB_APP_ID
-  GITHUB_CLIENT_ID
-  GITHUB_PRIVATE_KEY
-)
-
-for var in "${required_vars[@]}"; do
+for var in GITHUB_APP_ID GITHUB_CLIENT_ID; do
   if [[ -z "${!var:-}" ]]; then
     echo "Error: $var is not set" >&2
     exit 1
   fi
 done
 
-# Support base64-encoded private key in CI (GITHUB_PRIVATE_KEY_BASE64)
-private_key="${GITHUB_PRIVATE_KEY}"
-if [[ -n "${GITHUB_PRIVATE_KEY_BASE64:-}" ]]; then
-  private_key="${GITHUB_PRIVATE_KEY_BASE64}"
+if [[ -z "${GITHUB_PRIVATE_KEY:-}" && -z "${GITHUB_PRIVATE_KEY_BASE64:-}" ]]; then
+  echo "Error: GITHUB_PRIVATE_KEY or GITHUB_PRIVATE_KEY_BASE64 must be set" >&2
+  exit 1
 fi
+
+private_key="${GITHUB_PRIVATE_KEY:-${GITHUB_PRIVATE_KEY_BASE64}}"
 
 cat > "$OUTPUT" <<EOF
 // Auto-generated — do not commit
