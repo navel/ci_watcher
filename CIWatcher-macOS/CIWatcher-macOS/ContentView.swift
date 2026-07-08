@@ -107,7 +107,7 @@ struct RepositoryView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
-                ForEach(workflowRuns.prefix(5)) { run in
+                ForEach(workflowRuns) { run in
                     WorkflowRunRow(
                         ciService: ciService,
                         repository: repository,
@@ -115,6 +115,27 @@ struct RepositoryView: View {
                         isExpanded: expandedRunKey == WorkflowRunKey(repositoryId: repository.id, runId: run.id),
                         onToggle: { toggleRun(run) }
                     )
+                }
+                
+                if ciService.hasMoreWorkflowRuns(for: repository) {
+                    Button {
+                        Task {
+                            await ciService.loadMoreWorkflowRuns(for: repository)
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            if ciService.isLoadingMore(for: repository) {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            }
+                            Text("Load more")
+                                .font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.secondary)
+                    .disabled(ciService.isLoadingMore(for: repository))
                 }
             }
         }

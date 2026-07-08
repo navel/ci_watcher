@@ -5,16 +5,21 @@ import Combine
 public class CIService: ObservableObject {
     @Published public private(set) var repositories: [CIRepository] = []
     @Published public private(set) var workflowRuns: [CIRepository.ID: [WorkflowRun]] = [:]
+    @Published public private(set) var workflowRunsHasMore: [CIRepository.ID: Bool] = [:]
     @Published public private(set) var workflowJobs: [WorkflowRunKey: [WorkflowJob]] = [:]
     @Published public private(set) var loadingJobKeys: Set<WorkflowRunKey> = []
+    @Published public private(set) var loadingMoreRepositoryIDs: Set<CIRepository.ID> = []
     @Published public private(set) var isLoading: Bool = false
     @Published public private(set) var lastError: Error?
+    
+    public static let workflowRunsPageSize = 5
     
     private var apiClient: GitHubAPIClient?
     private let publicAPIClient = GitHubAPIClient.publicAccess
     private var pollingTimer: Timer?
     private let pollingInterval: TimeInterval = 60.0 // 60 seconds
     private let repositoriesKey = "CIWatcher.TrackedRepositories"
+    private var workflowRunsPage: [CIRepository.ID: Int] = [:]
     
     public init() {
         loadRepositories()
@@ -104,6 +109,9 @@ public class CIService: ObservableObject {
     public func removeRepository(_ repository: CIRepository) {
         repositories.removeAll { $0.id == repository.id }
         workflowRuns.removeValue(forKey: repository.id)
+        workflowRunsHasMore.removeValue(forKey: repository.id)
+        workflowRunsPage.removeValue(forKey: repository.id)
+        loadingMoreRepositoryIDs.remove(repository.id)
         workflowJobs = workflowJobs.filter { $0.key.repositoryId != repository.id }
         saveRepositories()
     }
@@ -178,9 +186,10 @@ public class CIService: ObservableObject {
                 let response = try await client.getWorkflowRuns(
                     owner: repository.owner,
                     repo: repository.name,
-                    perPage: 10
+                    perPage: Self.workflowRunsPageSize,
+                    page: 1
                 )
-                workflowRuns[repository.id] = response.workflowRuns
+                applyWorkflowRunsResponse(response, for: repository, page: 1)
                 
                 // Обрабатываем уведомления для этого репозитория
                 await NotificationEngine.shared.processWorkflowRuns(
@@ -208,9 +217,10 @@ public class CIService: ObservableObject {
             let response = try await client.getWorkflowRuns(
                 owner: repository.owner,
                 repo: repository.name,
-                perPage: 10
+                perPage: Self.workflowRunsPageSize,
+                page: 1
             )
-            workflowRuns[repository.id] = response.workflowRuns
+            applyWorkflowRunsResponse(response, for: repository, page: 1)
             
             // Обрабатываем уведомления для этого репозитория
             await NotificationEngine.shared.processWorkflowRuns(
@@ -222,6 +232,52 @@ public class CIService: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    public func hasMoreWorkflowRuns(for repository: CIRepository) -> Bool {
+        workflowRunsHasMore[repository.id] ?? false
+    }
+    
+    public func isLoadingMore(for repository: CIRepository) -> Bool {
+        loadingMoreRepositoryIDs.contains(repository.id)
+    }
+    
+    public func loadMoreWorkflowRuns(for repository: CIRepository) async {
+        guard hasMoreWorkflowRuns(for: repository),
+              !isLoadingMore(for: repository),
+              let client = apiClient(for: repository) else {
+            return
+        }
+        
+        let nextPage = (workflowRunsPage[repository.id] ?? 1) + 1
+        loadingMoreRepositoryIDs.insert(repository.id)
+        defer { loadingMoreRepositoryIDs.remove(repository.id) }
+        
+        do {
+            let response = try await client.getWorkflowRuns(
+                owner: repository.owner,
+                repo: repository.name,
+                perPage: Self.workflowRunsPageSize,
+                page: nextPage
+            )
+            var existing = workflowRuns[repository.id] ?? []
+            existing.append(contentsOf: response.workflowRuns)
+            workflowRuns[repository.id] = existing
+            workflowRunsPage[repository.id] = nextPage
+            workflowRunsHasMore[repository.id] = existing.count < response.totalCount
+        } catch {
+            lastError = error
+        }
+    }
+    
+    private func applyWorkflowRunsResponse(
+        _ response: WorkflowRunsResponse,
+        for repository: CIRepository,
+        page: Int
+    ) {
+        workflowRuns[repository.id] = response.workflowRuns
+        workflowRunsPage[repository.id] = page
+        workflowRunsHasMore[repository.id] = response.workflowRuns.count < response.totalCount
     }
     
     // MARK: - Workflow Jobs

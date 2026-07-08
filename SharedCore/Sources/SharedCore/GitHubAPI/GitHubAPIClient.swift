@@ -127,9 +127,10 @@ public class GitHubAPIClient {
     public func getWorkflowRuns(
         owner: String,
         repo: String,
-        perPage: Int = 30
+        perPage: Int = 30,
+        page: Int = 1
     ) async throws -> WorkflowRunsResponse {
-        let endpoint = "/repos/\(owner)/\(repo)/actions/runs?per_page=\(perPage)"
+        let endpoint = "/repos/\(owner)/\(repo)/actions/runs?per_page=\(perPage)&page=\(page)"
         
         let data = try await makeRequest(endpoint: endpoint)
         
