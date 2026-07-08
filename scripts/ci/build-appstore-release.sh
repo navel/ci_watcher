@@ -23,6 +23,14 @@ PKG_PATH="$ROOT/build/CIWatcher-${VERSION}.pkg"
 chmod +x scripts/ci/generate-secrets-xcconfig.sh
 ./scripts/ci/generate-secrets-xcconfig.sh
 
+PBXPROJ="CIWatcher-macOS/CIWatcher-macOS.xcodeproj/project.pbxproj"
+cp "$PBXPROJ" "$PBXPROJ.bak"
+sed -i '' 's|CIWatcher_macOS_Direct.entitlements|CIWatcher_macOS_AppStore.entitlements|g' "$PBXPROJ"
+restore_pbxproj() {
+  mv "$PBXPROJ.bak" "$PBXPROJ"
+}
+trap restore_pbxproj EXIT
+
 xcodebuild -resolvePackageDependencies \
   -workspace CIWatcher.xcworkspace \
   -scheme CIWatcher-macOS
@@ -35,7 +43,6 @@ xcodebuild archive \
   -destination "generic/platform=macOS" \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
-  CODE_SIGN_ENTITLEMENTS="CIWatcher-macOS/CIWatcher_macOS_AppStore.entitlements" \
   DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
   OTHER_SWIFT_FLAGS="-D APPSTORE"
 
