@@ -11,14 +11,25 @@ public enum GitHubAPIError: Error {
 
 public class GitHubAPIClient {
     private let baseURL = "https://api.github.com"
-    private let token: String
+    private let token: String?
     private let session: URLSession
+    
+    public static let publicAccess = GitHubAPIClient(token: nil)
     
     public init(token: String) {
         self.token = token
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         // Disable caching to ensure we always get fresh data
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
+        self.session = URLSession(configuration: config)
+    }
+    
+    private init(token: String?) {
+        self.token = token
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         config.urlCache = nil
         self.session = URLSession(configuration: config)
@@ -63,7 +74,9 @@ public class GitHubAPIClient {
         
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
@@ -93,6 +106,21 @@ public class GitHubAPIClient {
             throw error
         } catch {
             throw GitHubAPIError.networkError(error)
+        }
+    }
+    
+    public func getRepository(
+        owner: String,
+        repo: String
+    ) async throws -> GitHubRepository {
+        let endpoint = "/repos/\(owner)/\(repo)"
+        let data = try await makeRequest(endpoint: endpoint)
+        
+        do {
+            let apiResponse = try JSONDecoder().decode(GitHubRepositoryAPI.self, from: data)
+            return apiResponse.toGitHubRepository()
+        } catch {
+            throw GitHubAPIError.decodingError(error)
         }
     }
     

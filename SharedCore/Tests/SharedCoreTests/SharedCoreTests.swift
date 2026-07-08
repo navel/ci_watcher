@@ -10,7 +10,54 @@ final class SharedCoreTests: XCTestCase {
         )
         
         XCTAssertEqual(repo.fullName, "octocat/hello-world")
+        XCTAssertEqual(repo.source, .installation)
         XCTAssertNotNil(repo.id)
+    }
+    
+    func testCIRepositoryDecodesLegacyDataWithoutSource() throws {
+        let json = """
+        {
+          "id": "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+          "owner": "octocat",
+          "name": "hello-world",
+          "isPrivate": false
+        }
+        """
+        
+        let repo = try JSONDecoder().decode(CIRepository.self, from: Data(json.utf8))
+        XCTAssertEqual(repo.source, .installation)
+    }
+    
+    func testGitHubRepositoryAPIDecoding() throws {
+        let json = """
+        {
+          "name": "next.js",
+          "full_name": "vercel/next.js",
+          "private": false,
+          "owner": { "login": "vercel" }
+        }
+        """
+        
+        let repo = try JSONDecoder().decode(GitHubRepositoryAPI.self, from: Data(json.utf8)).toGitHubRepository()
+        XCTAssertEqual(repo.fullName, "vercel/next.js")
+        XCTAssertFalse(repo.isPrivate)
+    }
+    
+    func testGitHubRepositoryReferenceParser() throws {
+        let samples = [
+            "apple/container",
+            "https://github.com/apple/container",
+            "github.com/apple/container/",
+            "https://github.com/apple/container.git",
+        ]
+        
+        for sample in samples {
+            let parsed = try GitHubRepositoryReferenceParser.parse(sample)
+            XCTAssertEqual(parsed.owner, "apple")
+            XCTAssertEqual(parsed.name, "container")
+        }
+        
+        XCTAssertThrowsError(try GitHubRepositoryReferenceParser.parse("https://gitlab.com/apple/container"))
     }
     
     func testWorkflowRunStatusEmoji() {

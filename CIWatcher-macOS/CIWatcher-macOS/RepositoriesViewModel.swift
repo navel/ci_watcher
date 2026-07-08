@@ -16,6 +16,8 @@ class RepositoriesViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var isRefreshing: Bool = false
+    @Published var manualRepoInput: String = ""
+    @Published var isAddingManual: Bool = false
     
     private let config = GitHubAppConfig.default
     
@@ -67,7 +69,8 @@ class RepositoriesViewModel: ObservableObject {
         let ciRepo = CIRepository(
             owner: owner,
             name: name,
-            isPrivate: repo.private
+            isPrivate: repo.private,
+            source: .installation
         )
         
         ciService.addRepository(ciRepo)
@@ -93,6 +96,32 @@ class RepositoriesViewModel: ObservableObject {
         let name = String(fullNameParts[1])
         
         return ciService.repositories.contains { $0.owner == owner && $0.name == name }
+    }
+    
+    func manualRepositories(in ciService: CIService) -> [CIRepository] {
+        ciService.repositories.filter { $0.source == .manual }
+    }
+    
+    func addManualRepository(to ciService: CIService) async {
+        let input = manualRepoInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !input.isEmpty else { return }
+        
+        isAddingManual = true
+        errorMessage = nil
+        
+        do {
+            try await ciService.addManualRepository(fullName: input)
+            manualRepoInput = ""
+        } catch {
+            let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = errorDescription
+        }
+        
+        isAddingManual = false
+    }
+    
+    func removeRepository(_ repository: CIRepository, from ciService: CIService) {
+        ciService.removeRepository(repository)
     }
 }
 

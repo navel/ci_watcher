@@ -14,6 +14,63 @@ struct RepositoriesSettingsView: View {
     
     var body: some View {
         Form {
+            if let errorMessage = viewModel.errorMessage {
+                Section {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                        Text(errorMessage)
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            
+            Section {
+                HStack(spacing: 8) {
+                    Text("Repository")
+                        .frame(width: 80, alignment: .leading)
+                    
+                    TextField("", text: $viewModel.manualRepoInput)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            Task {
+                                await viewModel.addManualRepository(to: ciService)
+                            }
+                        }
+                        .onChange(of: viewModel.manualRepoInput) { _, _ in
+                            viewModel.errorMessage = nil
+                        }
+                    
+                    Button("Add") {
+                        Task {
+                            await viewModel.addManualRepository(to: ciService)
+                        }
+                    }
+                    .disabled(viewModel.manualRepoInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isAddingManual)
+                }
+                
+                let manualRepositories = viewModel.manualRepositories(in: ciService)
+                if manualRepositories.isEmpty {
+                    Text("No manually added repositories")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(manualRepositories) { repository in
+                        ManualRepositoryRow(
+                            repository: repository,
+                            onRemove: {
+                                viewModel.removeRepository(repository, from: ciService)
+                            }
+                        )
+                    }
+                }
+            } header: {
+                Text("Other Repositories")
+            } footer: {
+                Text("Add open source repositories by name or URL, for example https://github.com/apple/container. Public repositories work without installing the GitHub App. Private repositories require GitHub App access.")
+            }
+            
             Section {
                 if viewModel.isLoading {
                     HStack {
@@ -63,24 +120,13 @@ struct RepositoriesSettingsView: View {
                     .padding(.vertical, 4)
                 }
             } header: {
-                Text("Tracked Repositories")
+                Text("GitHub App Repositories")
             } footer: {
                 if !viewModel.installations.isEmpty {
-                    Text("Select repositories to track their GitHub Actions workflows. Tracked repositories will appear in the main window.")
+                    Text("Repositories where CIWatcher is installed via the GitHub App.")
                 }
             }
             
-            if let errorMessage = viewModel.errorMessage {
-                Section {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.red)
-                        Text(errorMessage)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
         }
         .formStyle(.grouped)
         .onAppear {
@@ -146,6 +192,41 @@ struct InstallationRepositoriesSection: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+struct ManualRepositoryRow: View {
+    let repository: CIRepository
+    let onRemove: () -> Void
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(repository.fullName)
+                    .font(.subheadline)
+                HStack(spacing: 4) {
+                    if repository.isPrivate {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2)
+                        Text("Private")
+                            .font(.caption2)
+                    } else {
+                        Image(systemName: "globe")
+                            .font(.caption2)
+                        Text("Public")
+                            .font(.caption2)
+                    }
+                }
+                .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Button("Remove", action: onRemove)
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+        }
+        .padding(.vertical, 2)
     }
 }
 

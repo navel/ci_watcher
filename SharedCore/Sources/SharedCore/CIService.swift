@@ -11,6 +11,7 @@ public class CIService: ObservableObject {
     @Published public private(set) var lastError: Error?
     
     private var apiClient: GitHubAPIClient?
+    private let publicAPIClient = GitHubAPIClient.publicAccess
     private var pollingTimer: Timer?
     private let pollingInterval: TimeInterval = 60.0 // 60 seconds
     private let repositoriesKey = "CIWatcher.TrackedRepositories"
@@ -40,10 +41,64 @@ public class CIService: ObservableObject {
     // MARK: - Repository Management
     
     public func addRepository(_ repository: CIRepository) {
-        if !repositories.contains(where: { $0.id == repository.id }) {
+        if !repositories.contains(where: {
+            $0.owner.caseInsensitiveCompare(repository.owner) == .orderedSame &&
+            $0.name.caseInsensitiveCompare(repository.name) == .orderedSame
+        }) {
             repositories.append(repository)
             saveRepositories()
         }
+    }
+    
+    public func addManualRepository(fullName: String) async throws {
+        let (owner, name) = try GitHubRepositoryReferenceParser.parse(fullName)
+        
+        if repositories.contains(where: {
+            $0.owner.caseInsensitiveCompare(owner) == .orderedSame &&
+            $0.name.caseInsensitiveCompare(name) == .orderedSame
+        }) {
+            throw RepositoryAddError.alreadyTracked
+        }
+        
+        let lookupClient = apiClient ?? publicAPIClient
+        let repoInfo: GitHubRepository
+        do {
+            repoInfo = try await lookupClient.getRepository(owner: owner, repo: name)
+        } catch GitHubAPIError.unauthorized, GitHubAPIError.invalidResponse {
+            throw RepositoryAddError.notFound
+        } catch {
+            throw RepositoryAddError.notFound
+        }
+        
+        if repoInfo.isPrivate, apiClient == nil {
+            throw RepositoryAddError.notConnected
+        }
+        
+        let workflowClient = apiClient(for: CIRepository(
+            owner: owner,
+            name: name,
+            isPrivate: repoInfo.isPrivate,
+            source: .manual
+        ))
+        
+        guard let workflowClient else {
+            throw RepositoryAddError.notConnected
+        }
+        
+        do {
+            _ = try await workflowClient.getWorkflowRuns(owner: owner, repo: name, perPage: 1)
+        } catch {
+            throw RepositoryAddError.noAccess
+        }
+        
+        let ciRepo = CIRepository(
+            owner: repoInfo.owner,
+            name: repoInfo.name,
+            isPrivate: repoInfo.isPrivate,
+            source: .manual
+        )
+        addRepository(ciRepo)
+        await fetchWorkflowRuns(for: ciRepo)
     }
     
     public func removeRepository(_ repository: CIRepository) {
@@ -111,16 +166,16 @@ public class CIService: ObservableObject {
             }
         }
         
-        guard let apiClient = apiClient else {
-            return
-        }
-        
         isLoading = true
         lastError = nil
         
         for repository in repositories {
+            guard let client = apiClient(for: repository) else {
+                continue
+            }
+            
             do {
-                let response = try await apiClient.getWorkflowRuns(
+                let response = try await client.getWorkflowRuns(
                     owner: repository.owner,
                     repo: repository.name,
                     perPage: 10
@@ -142,7 +197,7 @@ public class CIService: ObservableObject {
     }
     
     public func fetchWorkflowRuns(for repository: CIRepository) async {
-        guard let apiClient = apiClient else {
+        guard let client = apiClient(for: repository) else {
             return
         }
         
@@ -150,7 +205,7 @@ public class CIService: ObservableObject {
         lastError = nil
         
         do {
-            let response = try await apiClient.getWorkflowRuns(
+            let response = try await client.getWorkflowRuns(
                 owner: repository.owner,
                 repo: repository.name,
                 perPage: 10
@@ -186,7 +241,7 @@ public class CIService: ObservableObject {
             return
         }
         
-        guard let apiClient = apiClient else {
+        guard let client = apiClient(for: repository) else {
             return
         }
         
@@ -194,7 +249,7 @@ public class CIService: ObservableObject {
         defer { loadingJobKeys.remove(key) }
         
         do {
-            let response = try await apiClient.getWorkflowRunJobs(
+            let response = try await client.getWorkflowRunJobs(
                 owner: repository.owner,
                 repo: repository.name,
                 runId: run.id
@@ -202,6 +257,15 @@ public class CIService: ObservableObject {
             workflowJobs[key] = response.jobs
         } catch {
             lastError = error
+        }
+    }
+    
+    private func apiClient(for repository: CIRepository) -> GitHubAPIClient? {
+        switch repository.source {
+        case .manual where !repository.isPrivate:
+            return publicAPIClient
+        case .manual, .installation:
+            return apiClient
         }
     }
     
