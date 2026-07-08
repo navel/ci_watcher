@@ -41,4 +41,5 @@ jobs:
             -scheme CIWatcher-macOS \
             -destination 'platform=macOS' \
             ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES \
+            CODE_SIGN_IDENTITY=- \
             build

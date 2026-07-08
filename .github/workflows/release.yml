@@ -56,17 +56,10 @@ jobs:
         env:
           SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
           VERSION: ${{ github.ref_name }}
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           if [ -z "$SPARKLE_PRIVATE_ED_KEY" ]; then
             echo "Error: SPARKLE_PRIVATE_ED_KEY is required for signed updates"
-            exit 1
-          fi
-
-          VERSION="${VERSION#v}"
-          RELEASE_ZIP="build/CIWatcher-${VERSION}.zip"
-
-          if [ ! -f "$RELEASE_ZIP" ]; then
-            echo "Release zip not found: $RELEASE_ZIP"
             exit 1
           fi
 
@@ -74,25 +67,10 @@ jobs:
           curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
           tar xf sparkle.tar.xz
 
-          echo "$SPARKLE_PRIVATE_ED_KEY" | base64 --decode > eddsa_private_key
-
-          # Verify we can sign the update archive
-          ./bin/sign_update --ed-key-file eddsa_private_key "$RELEASE_ZIP"
-
-          mkdir -p build/appcast
-          cp "$RELEASE_ZIP" build/appcast/
-
-          ./bin/generate_appcast --ed-key-file eddsa_private_key build/appcast
-          cp build/appcast/appcast.xml build/appcast.xml
-
-          if ! grep -q 'sparkle:edSignature' build/appcast.xml; then
-            echo "Error: appcast.xml is missing sparkle:edSignature"
-            cat build/appcast.xml
-            exit 1
-          fi
-
-          rm -f eddsa_private_key
-          echo "Signed appcast generated successfully"
+          export SPARKLE_BIN_DIR="$PWD/bin"
+          export RELEASE_ZIP="build/CIWatcher-${VERSION#v}.zip"
+          chmod +x scripts/ci/generate-appcast.sh
+          ./scripts/ci/generate-appcast.sh build/appcast.xml
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
