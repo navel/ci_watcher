@@ -24,8 +24,18 @@ Download [Sparkle](https://github.com/sparkle-project/Sparkle/releases) and gene
 ```
 
 This creates:
-- `eddsa_private_key` → GitHub Secret `SPARKLE_PRIVATE_ED_KEY`
+- `eddsa_private_key` → export with `./generate_keys -x eddsa_private_key`, then base64-encode for GitHub Secret `SPARKLE_PRIVATE_ED_KEY`
 - Public key string → GitHub Secret `SPARKLE_PUBLIC_ED_KEY` and local `Secrets.xcconfig`
+
+Encode private key for GitHub Secret:
+
+```bash
+cd ~/Downloads/Sparkle-for-Swift-Package-Manager/bin
+./generate_keys -x eddsa_private_key
+base64 -i eddsa_private_key | tr -d '\n' | pbcopy
+```
+
+Paste into `SPARKLE_PRIVATE_ED_KEY` (single line, base64).
 
 #### 3. GitHub Repository Secrets
 

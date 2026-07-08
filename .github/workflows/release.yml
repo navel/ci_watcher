@@ -61,17 +61,20 @@ jobs:
             echo "SPARKLE_PRIVATE_ED_KEY not set, skipping appcast"
             exit 0
           fi
-          # Download Sparkle tools
-          SPARKLE_VERSION="2.6.4"
+
+          SPARKLE_VERSION="2.9.4"
           curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
           tar xf sparkle.tar.xz
-          
+
           mkdir -p build/appcast
           cp build/CIWatcher-*.zip build/appcast/
-          
-          echo "$SPARKLE_PRIVATE_ED_KEY" > ed_private_key
-          ./bin/generate_appcast -f ed_private_key build/appcast
+
+          # Secret must be base64 of the file exported via: ./generate_keys -x eddsa_private_key
+          echo "$SPARKLE_PRIVATE_ED_KEY" | base64 --decode > eddsa_private_key
+
+          ./bin/generate_appcast --ed-key-file eddsa_private_key build/appcast
           cp build/appcast/appcast.xml build/appcast.xml
+          rm -f eddsa_private_key
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
