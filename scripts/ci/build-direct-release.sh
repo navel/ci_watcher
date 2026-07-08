@@ -24,6 +24,26 @@ echo "Building CIWatcher ${VERSION} (${BUILD_NUMBER})"
 chmod +x scripts/ci/generate-secrets-xcconfig.sh
 ./scripts/ci/generate-secrets-xcconfig.sh
 
+# Resolve signing identity (Developer ID Application for GitHub Releases)
+KEYCHAIN_SEARCH=(find-identity -v -p codesigning)
+if [[ -n "${KEYCHAIN_PATH:-}" ]]; then
+  KEYCHAIN_SEARCH+=( "$KEYCHAIN_PATH" )
+fi
+
+if [[ -n "${DEVELOPER_ID_APPLICATION:-}" ]]; then
+  SIGNING_IDENTITY="$DEVELOPER_ID_APPLICATION"
+else
+  SIGNING_IDENTITY=$(security "${KEYCHAIN_SEARCH[@]}" | grep "Developer ID Application" | head -1 | sed -E 's/^[[:space:]]*[0-9]+) (.*)"/\1/')
+fi
+
+if [[ -z "$SIGNING_IDENTITY" ]]; then
+  echo "Error: Developer ID Application certificate not found in keychain" >&2
+  security "${KEYCHAIN_SEARCH[@]}" >&2 || true
+  exit 1
+fi
+
+echo "Using signing identity: $SIGNING_IDENTITY"
+
 # Resolve packages
 xcodebuild -resolvePackageDependencies \
   -workspace CIWatcher.xcworkspace \
@@ -39,6 +59,8 @@ xcodebuild archive \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   CODE_SIGN_ENTITLEMENTS="CIWatcher-macOS/CIWatcher_macOS_Direct.entitlements" \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
   DEVELOPMENT_TEAM="${APPLE_TEAM_ID}"
 
 # Generate export options with team ID
