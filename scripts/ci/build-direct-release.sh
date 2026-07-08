@@ -40,10 +40,11 @@ fi
 SIGNING_IDENTITY="Developer ID Application"
 echo "Using signing identity: $SIGNING_IDENTITY"
 
-# Resolve packages
+# Resolve packages (use locked versions only)
 xcodebuild -resolvePackageDependencies \
   -workspace CIWatcher.xcworkspace \
-  -scheme CIWatcher-macOS
+  -scheme CIWatcher-macOS \
+  -onlyUsePackageVersionsFromResolvedFile YES
 
 # Archive (universal binary)
 xcodebuild archive \
@@ -52,6 +53,7 @@ xcodebuild archive \
   -configuration Release \
   -archivePath "$ARCHIVE_PATH" \
   -destination "generic/platform=macOS" \
+  -onlyUsePackageVersionsFromResolvedFile YES \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   CODE_SIGN_STYLE=Manual \
