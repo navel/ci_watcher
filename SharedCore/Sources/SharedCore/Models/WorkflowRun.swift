@@ -2,14 +2,25 @@ import Foundation
 
 public struct WorkflowRun: Identifiable, Codable, Hashable {
     public let id: Int
+    /// Commit/PR title shown in the UI.
     public let name: String
+    /// Workflow name from GitHub API (e.g. "CI", "Release").
+    public let workflowName: String
     public let status: String
     public let conclusion: String?
     public let createdAt: Date
     
-    public init(id: Int, name: String, status: String, conclusion: String?, createdAt: Date) {
+    public init(
+        id: Int,
+        name: String,
+        workflowName: String,
+        status: String,
+        conclusion: String?,
+        createdAt: Date
+    ) {
         self.id = id
         self.name = name
+        self.workflowName = workflowName
         self.status = status
         self.conclusion = conclusion
         self.createdAt = createdAt
@@ -35,6 +46,23 @@ public struct WorkflowRun: Identifiable, Codable, Hashable {
         default:
             return "⚪"
         }
+    }
+}
+
+extension Array where Element == WorkflowRun {
+    /// Keeps the newest run for each workflow name. Assumes runs are sorted newest-first.
+    func latestPerWorkflow() -> [WorkflowRun] {
+        var seen = Set<String>()
+        var result: [WorkflowRun] = []
+        result.reserveCapacity(count)
+        
+        for run in self {
+            if seen.insert(run.workflowName).inserted {
+                result.append(run)
+            }
+        }
+        
+        return result
     }
 }
 
@@ -80,6 +108,7 @@ public struct WorkflowRunAPI: Codable {
             return WorkflowRun(
                 id: id,
                 name: displayTitle ?? name,
+                workflowName: name,
                 status: status,
                 conclusion: conclusion,
                 createdAt: date2
@@ -89,6 +118,7 @@ public struct WorkflowRunAPI: Codable {
         return WorkflowRun(
             id: id,
             name: displayTitle ?? name,
+            workflowName: name,
             status: status,
             conclusion: conclusion,
             createdAt: date

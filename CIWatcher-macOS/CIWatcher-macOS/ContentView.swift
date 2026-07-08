@@ -117,11 +117,21 @@ struct WorkflowRunRow: View {
     let run: WorkflowRun
     
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 8) {
             Text(run.statusEmoji)
-            Text(run.name)
-                .font(.subheadline)
-            Spacer()
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(run.workflowName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text(run.name)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            
+            Spacer(minLength: 8)
+            
             Text(run.createdAt, style: .relative)
                 .font(.caption)
                 .foregroundColor(.secondary)

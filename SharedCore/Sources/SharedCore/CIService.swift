@@ -169,11 +169,17 @@ public class CIService: ObservableObject {
     // MARK: - Status Helpers
     
     public func overallStatus() -> String {
+        Self.computeOverallStatus(from: workflowRuns)
+    }
+    
+    /// Computes aggregate status from the latest run of each workflow per repository.
+    /// Runs are expected newest-first (as returned by the GitHub API).
+    nonisolated static func computeOverallStatus(from workflowRuns: [CIRepository.ID: [WorkflowRun]]) -> String {
         var hasFailure = false
         var hasRunning = false
         
         for (_, runs) in workflowRuns {
-            for run in runs {
+            for run in runs.latestPerWorkflow() {
                 if run.displayStatus == "failure" {
                     hasFailure = true
                 }

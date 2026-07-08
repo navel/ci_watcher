@@ -175,8 +175,8 @@ public class NotificationEngine: ObservableObject {
             emoji = workflowRun.statusEmoji
         }
         
-        content.title = "\(emoji) \(workflowRun.name)"
-        content.body = "\(repository.fullName) - \(statusText)"
+        content.title = "\(emoji) \(workflowRun.workflowName)"
+        content.body = "\(repository.fullName) — \(workflowRun.name) — \(statusText)"
         content.sound = .default
         content.categoryIdentifier = "CI_WORKFLOW_STATUS"
         
@@ -184,6 +184,7 @@ public class NotificationEngine: ObservableObject {
         content.userInfo = [
             "repositoryId": repository.id.uuidString,
             "workflowRunId": workflowRun.id,
+            "workflowName": workflowRun.workflowName,
             "status": workflowRun.status,
             "conclusion": workflowRun.conclusion ?? ""
         ]
