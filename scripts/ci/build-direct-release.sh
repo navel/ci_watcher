@@ -84,6 +84,9 @@ xcrun notarytool submit "$NOTARIZE_ZIP" \
 
 xcrun stapler staple "$APP_PATH"
 
+chmod +x scripts/ci/validate-sparkle-public-key.sh
+./scripts/ci/validate-sparkle-public-key.sh "$APP_PATH"
+
 # Package DMG
 mkdir -p "$ROOT/build/dmg-staging"
 cp -R "$APP_PATH" "$ROOT/build/dmg-staging/"

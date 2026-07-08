@@ -8,9 +8,6 @@
 import SwiftUI
 import AppKit
 import SharedCore
-#if !APPSTORE
-import Sparkle
-#endif
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
@@ -76,12 +73,15 @@ struct GeneralSettingsView: View {
             }
             
             #if !APPSTORE
-            Section {
-                Button("Check for Updates…") {
-                    NSApp.sendAction(#selector(SPUUpdater.checkForUpdates), to: nil, from: nil)
+            if let appDelegate = NSApp.delegate as? AppDelegate,
+               appDelegate.updaterController?.isAvailable == true {
+                Section {
+                    Button("Check for Updates…") {
+                        appDelegate.updaterController?.checkForUpdates()
+                    }
+                } header: {
+                    Text("Updates")
                 }
-            } header: {
-                Text("Updates")
             }
             #endif
         }

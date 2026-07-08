@@ -32,12 +32,14 @@
 	<string>$(GITHUB_PRIVATE_KEY)</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 	<key>SUFeedURL</key>
 	<string>https:/$()/github.com/navel/ci_watcher/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>$(SPARKLE_PUBLIC_ED_KEY)</string>
+	<string>k3pomKTiCxM3vZ3UoFqMujifU7v+AvkWu/FQWgZxXsk=</string>
 </dict>
 </plist>
 

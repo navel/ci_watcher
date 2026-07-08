@@ -144,9 +144,22 @@ After upload, submit for review in App Store Connect.
 
 ### Sparkle updates not working
 
-- Verify `SPARKLE_PUBLIC_ED_KEY` is in the built app's `Info.plist`
-- Verify `appcast.xml` is uploaded to the GitHub Release
+#### "The updater failed to start"
+
+Console usually shows: `The EdDSA public key is not valid`. The built app's `SUPublicEDKey` must be valid base64 that decodes to exactly 32 bytes. Re-run Sparkle's `./generate_keys` to see the correct value and compare with:
+
+```bash
+/usr/libexec/PlistBuddy -c "Print :SUPublicEDKey" /Applications/CIWatcher-macOS.app/Contents/Info.plist
+./scripts/ci/validate-sparkle-public-key.sh /Applications/CIWatcher-macOS.app
+```
+
+The public key is embedded in `Info.plist` (it is not secret). If you change Sparkle keys, update `Info.plist` and re-release.
+
+#### Other checks
+
+- Verify `appcast.xml` is uploaded to the GitHub Release with a valid `sparkle:edSignature`
 - Check `SUFeedURL` points to the correct release asset URL
+- For sandboxed Debug builds, ensure Sparkle installer mach-lookup entitlements are present
 
 ### Code signing in CI
 

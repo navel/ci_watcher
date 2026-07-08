@@ -11,7 +11,7 @@ import SharedCore
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController?
-    private var updaterController: UpdaterController?
+    private(set) var updaterController: UpdaterController?
     @MainActor var ciService: CIService = CIService()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
