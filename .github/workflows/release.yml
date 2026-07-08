@@ -56,10 +56,19 @@ jobs:
         continue-on-error: true
         env:
           SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+          VERSION: ${{ github.ref_name }}
         run: |
           if [ -z "$SPARKLE_PRIVATE_ED_KEY" ]; then
             echo "SPARKLE_PRIVATE_ED_KEY not set, skipping appcast"
             exit 0
+          fi
+
+          VERSION="${VERSION#v}"
+          RELEASE_ZIP="build/CIWatcher-${VERSION}.zip"
+
+          if [ ! -f "$RELEASE_ZIP" ]; then
+            echo "Release zip not found: $RELEASE_ZIP"
+            exit 1
           fi
 
           SPARKLE_VERSION="2.9.4"
@@ -67,11 +76,9 @@ jobs:
           tar xf sparkle.tar.xz
 
           mkdir -p build/appcast
-          cp build/CIWatcher-*.zip build/appcast/
+          cp "$RELEASE_ZIP" build/appcast/
 
-          # Secret must be base64 of the file exported via: ./generate_keys -x eddsa_private_key
           echo "$SPARKLE_PRIVATE_ED_KEY" | base64 --decode > eddsa_private_key
-
           ./bin/generate_appcast --ed-key-file eddsa_private_key build/appcast
           cp build/appcast/appcast.xml build/appcast.xml
           rm -f eddsa_private_key

@@ -72,8 +72,9 @@ codesign --verify --deep --strict "$APP_PATH"
 spctl --assess --type execute "$APP_PATH" || true
 
 # Notarize
-ditto -c -k --keepParent "$APP_PATH" "$ROOT/build/CIWatcher-notarize.zip"
-xcrun notarytool submit "$ROOT/build/CIWatcher-notarize.zip" \
+NOTARIZE_ZIP="$ROOT/build/.notarize-submit.zip"
+ditto -c -k --keepParent "$APP_PATH" "$NOTARIZE_ZIP"
+xcrun notarytool submit "$NOTARIZE_ZIP" \
   --apple-id "$NOTARY_APPLE_ID" \
   --password "$NOTARY_PASSWORD" \
   --team-id "$APPLE_TEAM_ID" \
