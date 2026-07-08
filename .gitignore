@@ -56,7 +56,9 @@ debug/
 lldb/
 *.lldbinit
 
-# Documentation (exclude all .md files in root except README.md)
+# Documentation (exclude all .md files in root except README.md, DEVELOPMENT.md, RELEASE.md)
 /*.md
 !/README.md
+!/DEVELOPMENT.md
+!/RELEASE.md
 

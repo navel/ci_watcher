@@ -30,6 +30,14 @@
 	<string>$(GITHUB_CLIENT_SECRET)</string>
 	<key>GITHUB_PRIVATE_KEY</key>
 	<string>$(GITHUB_PRIVATE_KEY)</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUFeedURL</key>
+	<string>https:/$()/github.com/navel/ci_watcher/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>$(SPARKLE_PUBLIC_ED_KEY)</string>
 </dict>
 </plist>
 

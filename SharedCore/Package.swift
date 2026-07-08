@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "SharedCore",
     platforms: [
-        .macOS(.v13),
+        .macOS(.v14),
         .iOS(.v16)
     ],
     products: [
@@ -14,13 +14,13 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/Kitura/Swift-JWT.git", from: "4.0.0")
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "5.0.0")
     ],
     targets: [
         .target(
             name: "SharedCore",
             dependencies: [
-                .product(name: "SwiftJWT", package: "Swift-JWT")
+                .product(name: "JWTKit", package: "jwt-kit")
             ],
             path: "Sources/SharedCore"
         ),

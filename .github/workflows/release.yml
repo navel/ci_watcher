@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Import Developer ID certificate
+        env:
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          echo "$APPLE_CERTIFICATE_BASE64" | base64 --decode > $RUNNER_TEMP/certificate.p12
+          security import $RUNNER_TEMP/certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+      - name: Build, notarize, and package
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+          GITHUB_APP_ID: ${{ secrets.CIWATCHER_APP_ID }}
+          GITHUB_CLIENT_ID: ${{ secrets.CIWATCHER_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.CIWATCHER_CLIENT_SECRET }}
+          GITHUB_PRIVATE_KEY_BASE64: ${{ secrets.CIWATCHER_PRIVATE_KEY_BASE64 }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
+          VERSION: ${{ github.ref_name }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          chmod +x scripts/ci/*.sh
+          ./scripts/ci/build-direct-release.sh
+
+      - name: Generate Sparkle appcast
+        continue-on-error: true
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+        run: |
+          if [ -z "$SPARKLE_PRIVATE_ED_KEY" ]; then
+            echo "SPARKLE_PRIVATE_ED_KEY not set, skipping appcast"
+            exit 0
+          fi
+          # Download Sparkle tools
+          SPARKLE_VERSION="2.6.4"
+          curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          tar xf sparkle.tar.xz
+          
+          mkdir -p build/appcast
+          cp build/CIWatcher-*.zip build/appcast/
+          
+          echo "$SPARKLE_PRIVATE_ED_KEY" > ed_private_key
+          ./bin/generate_appcast -f ed_private_key build/appcast
+          cp build/appcast/appcast.xml build/appcast.xml
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/CIWatcher-*.dmg
+            build/CIWatcher-*.zip
+            build/appcast.xml
+          generate_release_notes: true

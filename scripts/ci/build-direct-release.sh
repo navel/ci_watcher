@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Build, sign, notarize, and package CIWatcher for GitHub Releases.
+#
+# Required: APPLE_TEAM_ID, NOTARY_APPLE_ID, NOTARY_PASSWORD,
+#           GITHUB_APP_ID, GITHUB_CLIENT_ID, GITHUB_PRIVATE_KEY (or GITHUB_PRIVATE_KEY_BASE64)
+# Optional: SPARKLE_PUBLIC_ED_KEY, VERSION, BUILD_NUMBER
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT"
+
+VERSION="${VERSION#v}"
+VERSION="${VERSION:-1.0.0}"
+BUILD_NUMBER="${BUILD_NUMBER:-${GITHUB_RUN_NUMBER:-1}}"
+ARCHIVE_PATH="$ROOT/build/CIWatcher-macOS.xcarchive"
+EXPORT_PATH="$ROOT/build/export"
+APP_PATH="$EXPORT_PATH/CIWatcher-macOS.app"
+DMG_PATH="$ROOT/build/CIWatcher-${VERSION}.dmg"
+ZIP_PATH="$ROOT/build/CIWatcher-${VERSION}.zip"
+
+echo "Building CIWatcher ${VERSION} (${BUILD_NUMBER})"
+
+# Generate secrets config
+chmod +x scripts/ci/generate-secrets-xcconfig.sh
+./scripts/ci/generate-secrets-xcconfig.sh
+
+# Resolve packages
+xcodebuild -resolvePackageDependencies \
+  -workspace CIWatcher.xcworkspace \
+  -scheme CIWatcher-macOS
+
+# Archive (universal binary)
+xcodebuild archive \
+  -workspace CIWatcher.xcworkspace \
+  -scheme CIWatcher-macOS \
+  -configuration Release \
+  -archivePath "$ARCHIVE_PATH" \
+  -destination "generic/platform=macOS" \
+  MARKETING_VERSION="$VERSION" \
+  CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+  CODE_SIGN_ENTITLEMENTS="CIWatcher-macOS/CIWatcher_macOS_Direct.entitlements" \
+  DEVELOPMENT_TEAM="${APPLE_TEAM_ID}"
+
+# Generate export options with team ID
+sed "s/TEAM_ID_PLACEHOLDER/${APPLE_TEAM_ID}/g" ExportOptions/DirectDistribution.plist > /tmp/ExportOptions.plist
+
+# Export
+xcodebuild -exportArchive \
+  -archivePath "$ARCHIVE_PATH" \
+  -exportPath "$EXPORT_PATH" \
+  -exportOptionsPlist /tmp/ExportOptions.plist
+
+# Verify signature
+codesign --verify --deep --strict "$APP_PATH"
+spctl --assess --type execute "$APP_PATH" || true
+
+# Notarize
+ditto -c -k --keepParent "$APP_PATH" "$ROOT/build/CIWatcher-notarize.zip"
+xcrun notarytool submit "$ROOT/build/CIWatcher-notarize.zip" \
+  --apple-id "$NOTARY_APPLE_ID" \
+  --password "$NOTARY_PASSWORD" \
+  --team-id "$APPLE_TEAM_ID" \
+  --wait
+
+xcrun stapler staple "$APP_PATH"
+
+# Package DMG
+mkdir -p "$ROOT/build/dmg-staging"
+cp -R "$APP_PATH" "$ROOT/build/dmg-staging/"
+ln -s /Applications "$ROOT/build/dmg-staging/Applications"
+
+hdiutil create -volname "CIWatcher" \
+  -srcfolder "$ROOT/build/dmg-staging" \
+  -ov -format UDZO \
+  "$DMG_PATH"
+
+# ZIP for Sparkle appcast
+ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+
+echo "Built:"
+echo "  $APP_PATH"
+echo "  $DMG_PATH"
+echo "  $ZIP_PATH"

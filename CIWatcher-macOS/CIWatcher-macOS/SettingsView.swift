@@ -6,7 +6,11 @@
 //
 
 import SwiftUI
+import AppKit
 import SharedCore
+#if !APPSTORE
+import Sparkle
+#endif
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
@@ -65,11 +69,21 @@ struct GeneralSettingsView: View {
             }
             
             Section {
-                Link("GitHub Repository", destination: URL(string: "https://github.com/navel/ci-watcher")!)
-                Link("Documentation", destination: URL(string: "https://github.com/navel/ci-watcher")!)
+                Link("GitHub Repository", destination: URL(string: "https://github.com/navel/ci_watcher")!)
+                Link("Documentation", destination: URL(string: "https://github.com/navel/ci_watcher/blob/main/DEVELOPMENT.md")!)
             } header: {
                 Text("Resources")
             }
+            
+            #if !APPSTORE
+            Section {
+                Button("Check for Updates…") {
+                    NSApp.sendAction(#selector(SPUUpdater.checkForUpdates), to: nil, from: nil)
+                }
+            } header: {
+                Text("Updates")
+            }
+            #endif
         }
         .formStyle(.grouped)
     }

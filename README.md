@@ -1,20 +1,35 @@
 # CIWatcher
 
-Open-source macOS and iOS application for tracking GitHub Actions (CI)
+Open-source macOS application for tracking GitHub Actions (CI) from your menu bar.
 
-## Getting Started
+[![CI](https://github.com/navel/ci_watcher/actions/workflows/ci.yml/badge.svg)](https://github.com/navel/ci_watcher/actions/workflows/ci.yml)
 
-1. Copy `Secrets.xcconfig.example` to `Secrets.xcconfig` and fill in your GitHub App credentials
-2. Open `CIWatcher.xcworkspace` in Xcode
-3. Configure the project to use `Secrets.xcconfig` in Build Settings
-4. Build and run the app
+## Download
+
+Get the latest release from [GitHub Releases](https://github.com/navel/ci_watcher/releases).
+
+1. Download the `.dmg`
+2. Drag CIWatcher to Applications
+3. Open the app → **Settings → GitHub App → Connect GitHub**
+4. Select repositories to monitor
+
+The app checks for updates automatically (via Sparkle).
 
 ## Features
 
-- GitHub App authentication
+- GitHub App authentication — one click to connect
 - Monitor CI workflows from multiple repositories
-- Status bar integration (macOS)
-- Real-time status updates
+- Menu bar status indicator (🟢🟡🔴)
+- macOS notifications on status changes
+- Automatic updates from GitHub Releases
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for setup, architecture, and testing.
+
+## Releases
+
+See [RELEASE.md](RELEASE.md) for publishing to GitHub Releases and the Mac App Store.
 
 ## License
 

@@ -1,5 +1,5 @@
 import Foundation
-import SwiftJWT
+import JWTKit
 import Security
 
 /// GitHub App Authentication
@@ -16,26 +16,23 @@ public class GitHubAppAuth {
     
     /// Generate JWT token for GitHub App authentication
     /// JWT is valid for 10 minutes
-    public func generateJWT() throws -> String {
+    public func generateJWT() async throws -> String {
         do {
-            let keyData = try parsePEMPrivateKey(privateKey)
-            let header = Header(typ: "JWT")
-            
-            let now = Date()
-            let iatTime = Int64(now.addingTimeInterval(-60).timeIntervalSince1970)
-            let expTime = Int64(now.addingTimeInterval(10 * 60).timeIntervalSince1970)
-            
-            let claims = GitHubAppClaims(
-                iss: appID,
-                iat: iatTime,
-                exp: expTime
+            let pemString = try normalizedPEMString(privateKey)
+            let rsaPrivateKey = try Insecure.RSA.PrivateKey(pem: pemString)
+            let keys = await JWTKeyCollection().add(
+                rsa: rsaPrivateKey,
+                digestAlgorithm: .sha256
             )
             
-            var jwt = JWT(header: header, claims: claims)
+            let now = Date()
+            let payload = GitHubAppPayload(
+                iss: IssuerClaim(value: appID),
+                iat: IssuedAtClaim(value: now.addingTimeInterval(-60)),
+                exp: ExpirationClaim(value: now.addingTimeInterval(10 * 60))
+            )
             
-            let jwtSigner = JWTSigner.rs256(privateKey: keyData)
-            let signedJWT = try jwt.sign(using: jwtSigner)
-            return signedJWT
+            return try await keys.sign(payload)
         } catch {
             if error is GitHubAppAuthError {
                 throw error
@@ -46,10 +43,9 @@ public class GitHubAppAuth {
     
     // MARK: - Private Helpers
     
-    private func parsePEMPrivateKey(_ pemString: String) throws -> Data {
+    private func normalizedPEMString(_ pemString: String) throws -> String {
         let isBase64Only = !pemString.contains("-----BEGIN") && !pemString.contains("-----END")
         
-        var pemContent: String
         if isBase64Only {
             let cleanedBase64 = pemString
                 .replacingOccurrences(of: " ", with: "")
@@ -61,56 +57,18 @@ public class GitHubAppAuth {
                   let decodedString = String(data: decodedPEM, encoding: .utf8) else {
                 throw GitHubAppAuthError.invalidPrivateKey
             }
-            pemContent = decodedString
-        } else {
-            pemContent = pemString
+            return decodedString
         }
         
-        var keyString = pemContent
-            .replacingOccurrences(of: "-----BEGIN RSA PRIVATE KEY-----", with: "")
-            .replacingOccurrences(of: "-----END RSA PRIVATE KEY-----", with: "")
-            .replacingOccurrences(of: "-----BEGIN PRIVATE KEY-----", with: "")
-            .replacingOccurrences(of: "-----END PRIVATE KEY-----", with: "")
+        return pemString
             .replacingOccurrences(of: "\\n", with: "\n")
-            .replacingOccurrences(of: "\r\n", with: "\n")
-            .replacingOccurrences(of: "\r", with: "\n")
-            .replacingOccurrences(of: "\n", with: "")
-            .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: "\t", with: "")
-        
-        keyString = keyString.filter { char in
-            char.isLetter || char.isNumber || char == "+" || char == "/" || char == "="
-        }
-        
-        let remainder = keyString.count % 4
-        if remainder > 0 {
-            keyString += String(repeating: "=", count: 4 - remainder)
-        }
-        
-        var keyData = Data(base64Encoded: keyString)
-        if keyData == nil {
-            keyData = Data(base64Encoded: keyString, options: .ignoreUnknownCharacters)
-        }
-        if keyData == nil {
-            var testString = keyString.replacingOccurrences(of: "=", with: "")
-            let testRemainder = testString.count % 4
-            if testRemainder > 0 {
-                testString += String(repeating: "=", count: 4 - testRemainder)
-            }
-            keyData = Data(base64Encoded: testString)
-        }
-        
-        guard let decodedData = keyData else {
-            throw GitHubAppAuthError.invalidPrivateKey
-        }
-        
-        return decodedData
+            .replacingOccurrences(of: "\\r", with: "\r")
     }
     
     /// Get list of installations for the app
     public func getInstallations() async throws -> [Installation] {
         do {
-        let jwt = try generateJWT()
+        let jwt = try await generateJWT()
         let endpoint = "/app/installations"
         
         guard let url = URL(string: "\(baseURL)\(endpoint)") else {
@@ -150,7 +108,7 @@ public class GitHubAppAuth {
     /// - Parameter installationID: The installation ID
     /// - Returns: Installation access token
     public func getInstallationToken(installationID: Int) async throws -> InstallationToken {
-        let jwt = try generateJWT()
+        let jwt = try await generateJWT()
         let endpoint = "/app/installations/\(installationID)/access_tokens"
         
         guard let url = URL(string: "\(baseURL)\(endpoint)") else {
@@ -243,11 +201,15 @@ public class GitHubAppAuth {
 
 // MARK: - Models
 
-/// JWT Claims for GitHub App
-struct GitHubAppClaims: Claims {
-    let iss: String  // Issuer (App ID)
-    let iat: Int64   // Issued at (Unix timestamp in seconds)
-    let exp: Int64   // Expiration (Unix timestamp in seconds)
+/// JWT payload for GitHub App authentication
+struct GitHubAppPayload: JWTPayload {
+    var iss: IssuerClaim
+    var iat: IssuedAtClaim
+    var exp: ExpirationClaim
+    
+    func verify(using algorithm: some JWTAlgorithm) async throws {
+        try exp.verifyNotExpired()
+    }
 }
 
 public struct InstallationToken: Codable {
