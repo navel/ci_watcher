@@ -10,13 +10,15 @@ import SwiftUI
 import SharedCore
 
 class StatusBarController: ObservableObject {
+    private weak var appDelegate: AppDelegate?
     private var statusBarItem: NSStatusItem?
     private var popover: NSPopover?
     private var menu: NSMenu?
     
     @Published var statusEmoji: String = "⚪"
     
-    init() {
+    init(appDelegate: AppDelegate) {
+        self.appDelegate = appDelegate
         setupStatusBar()
     }
     
@@ -62,17 +64,7 @@ class StatusBarController: ObservableObject {
     }
     
     @objc private func openSettings() {
-        // Use the standard way to open Settings window
-        // This is equivalent to what SettingsLink does
-        if #available(macOS 13.0, *) {
-            if NSApp.responds(to: Selector(("showSettingsWindow:"))) {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-            }
-        } else {
-            if NSApp.responds(to: Selector(("showPreferencesWindow:"))) {
-                NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-            }
-        }
+        appDelegate?.openSettings()
     }
     
     @objc private func quitApp() {

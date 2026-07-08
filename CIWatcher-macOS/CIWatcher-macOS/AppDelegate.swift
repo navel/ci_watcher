@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize status bar
-        let statusBar = StatusBarController()
+        let statusBar = StatusBarController(appDelegate: self)
         self.statusBarController = statusBar
         
         // Hide dock icon for menu bar app
@@ -27,7 +27,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             _ = await NotificationEngine.shared.requestAuthorization()
             
             // Update ContentView with CI service
-            statusBar.updateContentView(ContentView(ciService: ciService))
+            statusBar.updateContentView(
+                ContentView(ciService: ciService, onOpenSettings: { [weak self] in
+                    self?.openSettings()
+                })
+            )
             
             // Try to initialize GitHub App authentication
             await initializeGitHubAppAuth()
@@ -66,6 +70,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func openSettings() {
+        Task { @MainActor in
+            SettingsWindowController.shared.show(
+                ciService: ciService,
+                updaterController: updaterController
+            )
+        }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         Task { @MainActor in
             ciService.stopPolling()

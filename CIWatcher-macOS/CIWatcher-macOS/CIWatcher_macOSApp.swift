@@ -6,18 +6,14 @@
 //
 
 import SwiftUI
-import SharedCore
 
 @main
 struct CIWatcher_macOSApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     var body: some Scene {
         Settings {
-            SettingsView(
-                ciService: appDelegate.ciService,
-                updaterController: appDelegate.updaterController
-            )
+            EmptyView()
         }
     }
 }

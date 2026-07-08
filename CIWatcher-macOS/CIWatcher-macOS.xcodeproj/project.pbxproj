@@ -769,6 +769,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		EB0628F12EDC2F760060FBB7 /* XCLocalSwiftPackageReference "../SharedCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../SharedCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		EB0629FE2EDC40000060FBB7 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -779,13 +786,6 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		EB0628F12EDC2F760060FBB7 /* XCLocalSwiftPackageReference "../SharedCore" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../SharedCore;
-		};
-/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		EB0628F72EDC31810060FBB7 /* SharedCore */ = {

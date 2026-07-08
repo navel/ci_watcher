@@ -11,6 +11,7 @@ import SharedCore
 
 struct ContentView: View {
     @ObservedObject var ciService: CIService
+    var onOpenSettings: () -> Void = {}
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -35,11 +36,14 @@ struct ContentView: View {
                         .buttonStyle(.plain)
                         .help("Refresh workflow runs")
                     }
-                    SettingsLink {
+                    Button {
+                        onOpenSettings()
+                    } label: {
                         Image(systemName: "gearshape.fill")
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
+                    .help("Settings")
                 }
             }
             .padding()
