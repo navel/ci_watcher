@@ -36,9 +36,9 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -workspace CIWatcher.xcworkspace \
             -scheme CIWatcher-macOS \
-            -onlyUsePackageVersionsFromResolvedFile YES
+            ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES
           xcodebuild -workspace CIWatcher.xcworkspace \
             -scheme CIWatcher-macOS \
             -destination 'platform=macOS' \
-            -onlyUsePackageVersionsFromResolvedFile YES \
+            ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES \
             build

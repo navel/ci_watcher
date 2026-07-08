@@ -44,7 +44,7 @@ echo "Using signing identity: $SIGNING_IDENTITY"
 xcodebuild -resolvePackageDependencies \
   -workspace CIWatcher.xcworkspace \
   -scheme CIWatcher-macOS \
-  -onlyUsePackageVersionsFromResolvedFile YES
+  ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES
 
 # Archive (universal binary)
 xcodebuild archive \
@@ -53,7 +53,7 @@ xcodebuild archive \
   -configuration Release \
   -archivePath "$ARCHIVE_PATH" \
   -destination "generic/platform=macOS" \
-  -onlyUsePackageVersionsFromResolvedFile YES \
+  ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   CODE_SIGN_STYLE=Manual \

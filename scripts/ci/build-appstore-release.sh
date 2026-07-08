@@ -34,7 +34,7 @@ trap restore_pbxproj EXIT
 xcodebuild -resolvePackageDependencies \
   -workspace CIWatcher.xcworkspace \
   -scheme CIWatcher-macOS \
-  -onlyUsePackageVersionsFromResolvedFile YES
+  ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES
 
 xcodebuild archive \
   -workspace CIWatcher.xcworkspace \
@@ -42,7 +42,7 @@ xcodebuild archive \
   -configuration Release \
   -archivePath "$ARCHIVE_PATH" \
   -destination "generic/platform=macOS" \
-  -onlyUsePackageVersionsFromResolvedFile YES \
+  ONLY_USE_PACKAGE_VERSIONS_FROM_RESOLVED_FILE=YES \
   MARKETING_VERSION="$VERSION" \
   CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
   DEVELOPMENT_TEAM="${APPLE_TEAM_ID}" \
