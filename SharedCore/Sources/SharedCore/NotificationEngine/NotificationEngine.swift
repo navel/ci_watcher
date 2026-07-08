@@ -175,8 +175,8 @@ public class NotificationEngine: ObservableObject {
             emoji = workflowRun.statusEmoji
         }
         
-        content.title = "\(emoji) \(workflowRun.workflowName)"
-        content.body = "\(repository.fullName) — \(workflowRun.name) — \(statusText)"
+        content.title = "\(emoji) \(repository.fullName) — \(workflowRun.workflowName)"
+        content.body = "\(workflowRun.name) — \(statusText)"
         content.sound = .default
         content.categoryIdentifier = "CI_WORKFLOW_STATUS"
         
