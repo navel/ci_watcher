@@ -38,6 +38,7 @@ final class UpdaterController {
 #else
 /// App Store builds use App Store for updates — Sparkle is disabled.
 final class UpdaterController {
+    var isAvailable: Bool { false }
     func checkForUpdates() {}
 }
 #endif

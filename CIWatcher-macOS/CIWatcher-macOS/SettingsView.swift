@@ -6,16 +6,17 @@
 //
 
 import SwiftUI
-import AppKit
 import SharedCore
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
     @StateObject private var repositoriesViewModel = RepositoriesViewModel()
     @ObservedObject var ciService: CIService
+    let updaterController: UpdaterController?
     
-    init(ciService: CIService) {
+    init(ciService: CIService, updaterController: UpdaterController? = nil) {
         self.ciService = ciService
+        self.updaterController = updaterController
     }
     
     var body: some View {
@@ -35,7 +36,7 @@ struct SettingsView: View {
                     Label("Notifications", systemImage: "bell")
                 }
             
-            GeneralSettingsView()
+            GeneralSettingsView(updaterController: updaterController)
                 .tabItem {
                     Label("General", systemImage: "gear")
                 }
@@ -45,6 +46,8 @@ struct SettingsView: View {
 }
 
 struct GeneralSettingsView: View {
+    let updaterController: UpdaterController?
+    
     var body: some View {
         Form {
             Section {
@@ -73,11 +76,10 @@ struct GeneralSettingsView: View {
             }
             
             #if !APPSTORE
-            if let appDelegate = NSApp.delegate as? AppDelegate,
-               appDelegate.updaterController?.isAvailable == true {
+            if updaterController?.isAvailable == true {
                 Section {
                     Button("Check for Updates…") {
-                        appDelegate.updaterController?.checkForUpdates()
+                        updaterController?.checkForUpdates()
                     }
                 } header: {
                     Text("Updates")

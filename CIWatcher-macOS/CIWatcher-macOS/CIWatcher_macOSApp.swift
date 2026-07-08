@@ -14,7 +14,10 @@ struct CIWatcher_macOSApp: App {
     
     var body: some Scene {
         Settings {
-            SettingsView(ciService: appDelegate.ciService)
+            SettingsView(
+                ciService: appDelegate.ciService,
+                updaterController: appDelegate.updaterController
+            )
         }
     }
 }

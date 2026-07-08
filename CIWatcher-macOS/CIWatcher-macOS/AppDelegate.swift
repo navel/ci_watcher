@@ -11,12 +11,10 @@ import SharedCore
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController?
-    private(set) var updaterController: UpdaterController?
+    private(set) var updaterController: UpdaterController? = UpdaterController()
     @MainActor var ciService: CIService = CIService()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        updaterController = UpdaterController()
-        
         // Initialize status bar
         let statusBar = StatusBarController()
         self.statusBarController = statusBar
