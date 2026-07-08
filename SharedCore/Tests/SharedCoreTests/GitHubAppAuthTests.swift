@@ -17,6 +17,22 @@ final class GitHubAppAuthTests: XCTestCase {
         XCTAssertEqual(jwt.components(separatedBy: ".").count, 3)
     }
     
+    func testJWTPayloadUsesIntegerTimestamps() async throws {
+        let auth = GitHubAppAuth(appID: TestFixtures.testAppID, privateKey: TestFixtures.rsaPrivateKeyPEM)
+        let jwt = try await auth.generateJWT()
+        let payloadPart = String(jwt.split(separator: ".")[1])
+        var base64 = payloadPart
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        while base64.count % 4 != 0 {
+            base64.append("=")
+        }
+        
+        let data = try XCTUnwrap(Data(base64Encoded: base64))
+        let json = try XCTUnwrap(String(data: data, encoding: .utf8))
+        XCTAssertFalse(json.contains("."), "GitHub requires integer JWT timestamps, got: \(json)")
+    }
+    
     func testJWTGenerationWithBase64EncodedKey() async throws {
         let pemData = TestFixtures.rsaPrivateKeyPEM.data(using: .utf8)!
         let base64Key = pemData.base64EncodedString()

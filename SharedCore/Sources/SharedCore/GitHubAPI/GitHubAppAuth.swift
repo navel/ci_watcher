@@ -25,11 +25,13 @@ public class GitHubAppAuth {
                 digestAlgorithm: .sha256
             )
             
-            let now = Date()
+            // GitHub requires integer Unix timestamps in JWT claims.
+            // JWTKit's Date-based claims encode fractional seconds, which GitHub rejects.
+            let now = Int(Date().timeIntervalSince1970)
             let payload = GitHubAppPayload(
                 iss: IssuerClaim(value: appID),
-                iat: IssuedAtClaim(value: now.addingTimeInterval(-60)),
-                exp: ExpirationClaim(value: now.addingTimeInterval(10 * 60))
+                iat: now - 60,
+                exp: now + 10 * 60
             )
             
             return try await keys.sign(payload)
@@ -204,11 +206,16 @@ public class GitHubAppAuth {
 /// JWT payload for GitHub App authentication
 struct GitHubAppPayload: JWTPayload {
     var iss: IssuerClaim
-    var iat: IssuedAtClaim
-    var exp: ExpirationClaim
+    var iat: Int
+    var exp: Int
     
     func verify(using algorithm: some JWTAlgorithm) async throws {
-        try exp.verifyNotExpired()
+        guard exp > Int(Date().timeIntervalSince1970) else {
+            throw JWTError.claimVerificationFailure(
+                failedClaim: ExpirationClaim(value: Date(timeIntervalSince1970: TimeInterval(exp))),
+                reason: "expired"
+            )
+        }
     }
 }
 
