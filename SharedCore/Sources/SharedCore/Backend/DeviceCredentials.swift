@@ -15,22 +15,37 @@ public struct DeviceCredentials: Sendable {
     }
 
     public static func loadOrCreate() -> DeviceCredentials {
-        if let idString = KeychainManager.retrieve(forKey: Keys.deviceID),
-           let secret = KeychainManager.retrieve(forKey: Keys.deviceSecret),
-           let deviceID = UUID(uuidString: idString) {
-            return DeviceCredentials(deviceID: deviceID, deviceSecret: secret)
+        if let credentials = loadFromUserDefaults() {
+            return credentials
         }
 
         let deviceID = UUID()
         let deviceSecret = generateSecret()
-        _ = KeychainManager.store(deviceID.uuidString, forKey: Keys.deviceID)
-        _ = KeychainManager.store(deviceSecret, forKey: Keys.deviceSecret)
+        saveToUserDefaults(deviceID: deviceID, deviceSecret: deviceSecret)
         return DeviceCredentials(deviceID: deviceID, deviceSecret: deviceSecret)
     }
 
     private enum Keys {
-        static let deviceID = "backend_device_id"
-        static let deviceSecret = "backend_device_secret"
+        static let deviceID = "CIWatcher.BackendDeviceID"
+        static let deviceSecret = "CIWatcher.BackendDeviceSecret"
+    }
+
+    private static var defaults: UserDefaults {
+        UserDefaults.standard
+    }
+
+    private static func loadFromUserDefaults() -> DeviceCredentials? {
+        guard let idString = defaults.string(forKey: Keys.deviceID),
+              let secret = defaults.string(forKey: Keys.deviceSecret),
+              let deviceID = UUID(uuidString: idString) else {
+            return nil
+        }
+        return DeviceCredentials(deviceID: deviceID, deviceSecret: secret)
+    }
+
+    private static func saveToUserDefaults(deviceID: UUID, deviceSecret: String) {
+        defaults.set(deviceID.uuidString, forKey: Keys.deviceID)
+        defaults.set(deviceSecret, forKey: Keys.deviceSecret)
     }
 
     private static func generateSecret() -> String {

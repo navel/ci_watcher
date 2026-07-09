@@ -15,40 +15,23 @@ public struct GitHubAppConfig {
         self.embeddedPrivateKey = embeddedPrivateKey
     }
     
-    /// Default configuration
-    /// Loads from Info.plist (which gets values from Secrets.xcconfig via build settings)
-    /// Falls back to Keychain if Info.plist values are not available
+    /// Default configuration from Info.plist (values come from Secrets.xcconfig via build settings).
     public static var `default`: GitHubAppConfig {
-        let bundle = Bundle.main
-        let infoDict = bundle.infoDictionary ?? [:]
+        let infoDict = Bundle.main.infoDictionary ?? [:]
         
         var appID = ""
         if let appIDValue = infoDict["GITHUB_APP_ID"] {
             appID = String(describing: appIDValue)
         }
         
-        var clientID = infoDict["GITHUB_CLIENT_ID"] as? String ?? ""
-        var clientSecret = infoDict["GITHUB_CLIENT_SECRET"] as? String
+        let clientID = infoDict["GITHUB_CLIENT_ID"] as? String ?? ""
+        let clientSecret = infoDict["GITHUB_CLIENT_SECRET"] as? String
         var privateKey = infoDict["GITHUB_PRIVATE_KEY"] as? String
         
         if let key = privateKey {
             privateKey = key
                 .replacingOccurrences(of: "\\n", with: "\n")
                 .replacingOccurrences(of: "\\r", with: "\r")
-        }
-        
-        if privateKey == nil || privateKey!.isEmpty {
-            privateKey = KeychainManager.getGitHubAppPrivateKey()
-        }
-        
-        if appID.isEmpty {
-            appID = KeychainManager.retrieve(forKey: "github_app_id") ?? ""
-        }
-        if clientID.isEmpty {
-            clientID = KeychainManager.retrieve(forKey: "github_client_id") ?? ""
-        }
-        if clientSecret == nil {
-            clientSecret = KeychainManager.retrieve(forKey: "github_client_secret")
         }
         
         return GitHubAppConfig(
@@ -65,22 +48,21 @@ public struct GitHubAppConfig {
         return !appID.isEmpty && !clientID.isEmpty && hasPrivateKey()
     }
     
-    /// Get private key (embedded or from Keychain fallback)
+    /// Get private key from build configuration.
     /// - Returns: Private key if found, nil otherwise
     public func getPrivateKey() -> String? {
-        if let embedded = embeddedPrivateKey, !embedded.isEmpty {
-            return embedded
+        guard let embedded = embeddedPrivateKey, !embedded.isEmpty else {
+            return nil
         }
-        return KeychainManager.getGitHubAppPrivateKey()
+        return embedded
     }
     
-    /// Check if private key is available
-    /// - Returns: True if private key exists (embedded or in Keychain)
+    /// Check if private key is available in build configuration.
     public func hasPrivateKey() -> Bool {
-        if let embedded = embeddedPrivateKey, !embedded.isEmpty {
-            return true
+        guard let embedded = embeddedPrivateKey, !embedded.isEmpty else {
+            return false
         }
-        return KeychainManager.exists(key: KeychainManager.gitHubAppPrivateKeyKey)
+        return true
     }
     
     /// Create GitHubAppAuth instance using private key
@@ -97,4 +79,3 @@ public struct GitHubAppConfig {
 public enum GitHubAppConfigError: Error {
     case privateKeyNotFound
 }
-
