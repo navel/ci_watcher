@@ -161,6 +161,22 @@ public class GitHubAPIClient {
             throw GitHubAPIError.decodingError(error)
         }
     }
+
+    public func getInstallationRepositories(
+        perPage: Int = 100,
+        page: Int = 1
+    ) async throws -> InstallationRepositoriesResponse {
+        let endpoint = "/installation/repositories?per_page=\(perPage)&page=\(page)"
+        let data = try await makeRequest(endpoint: endpoint)
+
+        do {
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(InstallationRepositoriesAPIResponse.self, from: data)
+            return apiResponse.toInstallationRepositoriesResponse()
+        } catch {
+            throw GitHubAPIError.decodingError(error)
+        }
+    }
     
     public func testConnection() async throws {
         // Test with a simple API call to verify token

@@ -12,58 +12,129 @@ import SharedCore
 
 @MainActor
 class SettingsViewModel: ObservableObject {
-    @Published var hasPrivateKey: Bool = false
-    @Published var installations: [Installation] = []
+    @Published var connectionStatus: GitHubConnectionStatus?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var isCheckingInstallations: Bool = false
-    
-    private let config = GitHubAppConfig.default
-    
-    init() {
-        checkPrivateKey()
+    @Published var isCheckingConnection: Bool = false
+    @Published var isConnecting: Bool = false
+    @Published var isDisconnecting: Bool = false
+
+    private let backendAuthClient: BackendAuthClient?
+    private let credentials = DeviceCredentials.loadOrCreate()
+    private var authCallbackObserver: NSObjectProtocol?
+    private var refreshConnectionTask: Task<Void, Never>?
+
+    var isBackendConfigured: Bool {
+        backendAuthClient != nil
     }
-    
-    func checkPrivateKey() {
-        hasPrivateKey = config.hasPrivateKey()
+
+    init(backendAuthClient: BackendAuthClient? = nil) {
+        self.backendAuthClient = backendAuthClient ?? BackendAuthClient.makeDefault()
+        authCallbackObserver = NotificationCenter.default.addObserver(
+            forName: .ciwatcherAuthCallback,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self else { return }
+            let success = notification.userInfo?["success"] as? Bool ?? false
+            if success {
+                Task {
+                    await self.refreshConnection()
+                    await self.ciServiceRefreshCallback?()
+                }
+            } else if let error = notification.userInfo?["error"] as? String {
+                self.errorMessage = error
+            }
+        }
     }
-    
-    func checkInstallations() async {
-        guard hasPrivateKey else {
-            errorMessage = "GitHub App configuration error. Please contact support."
+
+    deinit {
+        refreshConnectionTask?.cancel()
+        if let authCallbackObserver {
+            NotificationCenter.default.removeObserver(authCallbackObserver)
+        }
+    }
+
+    var ciServiceRefreshCallback: (() async -> Void)?
+
+    func refreshConnection() async {
+        refreshConnectionTask?.cancel()
+        let task = Task { @MainActor in
+            await performRefreshConnection()
+        }
+        refreshConnectionTask = task
+        await task.value
+    }
+
+    private func performRefreshConnection() async {
+        guard !Task.isCancelled else { return }
+
+        guard let backendAuthClient else {
+            errorMessage = "Backend API is not configured."
+            connectionStatus = nil
             return
         }
-        
-        isCheckingInstallations = true
+
+        isCheckingConnection = true
+        defer { isCheckingConnection = false }
+
         errorMessage = nil
-        
+
         do {
-            let auth = try config.createAuth()
-            installations = try await auth.getInstallations()
-            
-            if installations.isEmpty {
-                // No error message - just show the connect button
-                errorMessage = nil
+            connectionStatus = try await backendAuthClient.fetchConnectionStatus(credentials: credentials)
+        } catch {
+            guard !Task.isCancelled else { return }
+            let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = "Failed to check connection: \(errorDescription)"
+            connectionStatus = nil
+        }
+    }
+
+    func connectGitHub() async {
+        guard let backendAuthClient else {
+            errorMessage = "Backend API is not configured."
+            return
+        }
+
+        isConnecting = true
+        defer { isConnecting = false }
+
+        errorMessage = nil
+
+        do {
+            let response = try await backendAuthClient.startAuth(credentials: credentials)
+            guard let url = response.url else {
+                errorMessage = "Invalid auth URL from backend."
+                return
             }
+            NSWorkspace.shared.open(url)
         } catch {
             let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            errorMessage = "Failed to check installations: \(errorDescription)"
-            installations = []
-        }
-        
-        isCheckingInstallations = false
-    }
-    
-    func openInstallationURL() {
-        let oauth = GitHubAppOAuth(clientID: config.clientID)
-        if let url = oauth.getInstallationURL() {
-            NSWorkspace.shared.open(url)
+            errorMessage = "Failed to start GitHub connection: \(errorDescription)"
         }
     }
-    
-    func refreshInstallations() async {
-        checkPrivateKey()
-        await checkInstallations()
+
+    func disconnectGitHub() async {
+        guard let backendAuthClient else {
+            return
+        }
+
+        isDisconnecting = true
+        defer { isDisconnecting = false }
+
+        errorMessage = nil
+
+        do {
+            try await backendAuthClient.disconnect(credentials: credentials)
+            connectionStatus = GitHubConnectionStatus(
+                connected: false,
+                installationID: nil,
+                githubLogin: nil,
+                githubAccountType: nil
+            )
+        } catch {
+            let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            errorMessage = "Failed to disconnect: \(errorDescription)"
+        }
     }
 }
-

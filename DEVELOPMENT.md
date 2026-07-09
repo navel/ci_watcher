@@ -13,7 +13,8 @@
 CIWatcher.xcworkspace     # Open this in Xcode
 ├── CIWatcher-macOS/      # Menu bar macOS app
 ├── CIWatcher-iOS/        # iOS app (WIP)
-└── SharedCore/           # Shared Swift package (API, auth, notifications)
+├── SharedCore/           # Shared Swift package (API, auth, notifications)
+└── backend/              # Go auth API (GitHub App private key stays server-side)
 ```
 
 ## First-Time Setup
@@ -82,10 +83,43 @@ CIWATCHER_RUN_INTEGRATION_TESTS=1 swift test --filter Integration
 
 ## Architecture Notes
 
-- **Auth**: GitHub App JWT (via [jwt-kit](https://github.com/vapor/jwt-kit)) → installation token
+- **Auth (target)**: macOS app → backend API → GitHub App installation token → direct GitHub API calls from the app
+- **Auth (current app code)**: GitHub App JWT in the client (being migrated to backend)
 - **Updates**: Polling every 60 seconds (no webhook/server needed)
 - **Notifications**: `UNUserNotificationCenter` (macOS + iOS ready)
 - **Auto-updates**: [Sparkle](https://sparkle-project.org/) for GitHub Releases builds; disabled for App Store
+
+## Backend API (local)
+
+See [backend/README.md](backend/README.md) for full API docs and Fly.io deployment.
+
+```bash
+cd backend
+cp .env.example .env
+# fill GITHUB_APP_ID and GITHUB_PRIVATE_KEY
+docker compose up --build
+curl http://localhost:8080/health
+```
+
+GitHub App **Setup URL** for local testing (via tunnel) or production:
+
+`https://<api-domain>/v1/auth/callback`
+
+### Backend API URL in the macOS app
+
+Set `CIWATCHER_API_BASE_URL` in `Secrets.xcconfig`.
+
+**Important:** `.xcconfig` treats `//` as a comment, so URLs must use this syntax:
+
+```text
+# Production (Fly.io)
+CIWATCHER_API_BASE_URL = https:/$()/ciwatcher-api.fly.dev
+
+# Local backend (docker compose up in backend/)
+CIWATCHER_API_BASE_URL = http:/$()/localhost:8080
+```
+
+After changing `Secrets.xcconfig`, do **Product → Clean Build Folder** and rebuild.
 
 ## Entitlements
 

@@ -30,6 +30,19 @@
 	<string>$(GITHUB_CLIENT_SECRET)</string>
 	<key>GITHUB_PRIVATE_KEY</key>
 	<string>$(GITHUB_PRIVATE_KEY)</string>
+	<key>CIWATCHER_API_BASE_URL</key>
+	<string>$(CIWATCHER_API_BASE_URL)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>dev.ciwatcher.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ciwatcher</string>
+			</array>
+		</dict>
+	</array>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUEnableInstallerLauncherService</key>

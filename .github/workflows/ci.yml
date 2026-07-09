@@ -15,7 +15,7 @@ jobs:
       - name: Run SharedCore unit tests
         run: |
           cd SharedCore
-          swift test --filter 'GitHubAppAuthTests|GitHubAppConfigTests|SharedCoreTests'
+          swift test --filter 'GitHubAppAuthTests|GitHubAppConfigTests|SharedCoreTests|BackendAuthClientTests|RepositoryMigrationTests'
 
   build:
     runs-on: macos-26
@@ -26,7 +26,8 @@ jobs:
         env:
           GITHUB_APP_ID: "0"
           GITHUB_CLIENT_ID: "placeholder"
-          GITHUB_PRIVATE_KEY: "placeholder"
+          CIWATCHER_API_BASE_URL: "https://ciwatcher-api.fly.dev"
+          GITHUB_PRIVATE_KEY: ""
         run: |
           chmod +x scripts/ci/generate-secrets-xcconfig.sh
           ./scripts/ci/generate-secrets-xcconfig.sh

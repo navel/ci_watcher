@@ -79,14 +79,14 @@ struct RepositoriesSettingsView: View {
                         Text("Loading repositories...")
                             .foregroundColor(.secondary)
                     }
-                } else if viewModel.installations.isEmpty {
+                } else if viewModel.connectionStatus?.connected != true {
                     VStack(alignment: .leading, spacing: 12) {
                         Image(systemName: "tray")
                             .font(.title2)
                             .foregroundColor(.secondary)
-                        Text("No installations found")
+                        Text("GitHub not connected")
                             .font(.headline)
-                        Text("Connect GitHub App in the GitHub App tab to see repositories")
+                        Text("Connect GitHub in the GitHub App tab to see repositories")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -107,14 +107,45 @@ struct RepositoriesSettingsView: View {
                             .buttonStyle(.borderless)
                             .disabled(viewModel.isRefreshing)
                         }
-                        
-                        ForEach(viewModel.installations, id: \.id) { installation in
-                            InstallationRepositoriesSection(
-                                installation: installation,
-                                repositories: viewModel.repositoriesByInstallation[installation.id] ?? [],
-                                viewModel: viewModel,
-                                ciService: ciService
-                            )
+
+                        if let status = viewModel.connectionStatus {
+                            HStack {
+                                Image(systemName: "building.2.fill")
+                                    .foregroundColor(.blue)
+                                if let login = status.githubLogin, !login.isEmpty {
+                                    Text(login)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
+                                Spacer()
+                                Text("\(viewModel.installationRepositories.count) repository(ies)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        if viewModel.installationRepositories.isEmpty {
+                            Text("No repositories available")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(viewModel.installationRepositories, id: \.id) { repo in
+                                InstallationRepositoryRow(
+                                    repository: repo,
+                                    isTracked: viewModel.isRepositoryTracked(repo, in: ciService),
+                                    onToggle: {
+                                        Task {
+                                            if viewModel.isRepositoryTracked(repo, in: ciService) {
+                                                if let trackedRepo = ciService.repositories.first(where: { $0.fullName == repo.fullName }) {
+                                                    ciService.removeRepository(trackedRepo)
+                                                }
+                                            } else {
+                                                await viewModel.addRepositoryToTrack(repo, to: ciService)
+                                            }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                     .padding(.vertical, 4)
@@ -122,7 +153,7 @@ struct RepositoriesSettingsView: View {
             } header: {
                 Text("GitHub App Repositories")
             } footer: {
-                if !viewModel.installations.isEmpty {
+                if viewModel.connectionStatus?.connected == true {
                     Text("Repositories where CIWatcher is installed via the GitHub App.")
                 }
             }
@@ -137,61 +168,6 @@ struct RepositoriesSettingsView: View {
         .refreshable {
             await viewModel.refreshRepositories()
         }
-    }
-}
-
-struct InstallationRepositoriesSection: View {
-    let installation: Installation
-    let repositories: [InstallationRepository]
-    let viewModel: RepositoriesViewModel
-    @ObservedObject var ciService: CIService
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "building.2.fill")
-                    .foregroundColor(.blue)
-                if let account = installation.account {
-                    Text(account.login)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                } else {
-                    Text("Installation #\(installation.id)")
-                        .font(.subheadline)
-                }
-                Spacer()
-                Text("\(repositories.count) repository(ies)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            if repositories.isEmpty {
-                Text("No repositories available")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.leading, 24)
-            } else {
-                ForEach(repositories, id: \.id) { repo in
-                    RepositoryRow(
-                        repository: repo,
-                        isTracked: viewModel.isRepositoryTracked(repo, in: ciService),
-                        onToggle: {
-                            Task {
-                                if viewModel.isRepositoryTracked(repo, in: ciService) {
-                                    // Find and remove the tracked repository
-                                    if let trackedRepo = ciService.repositories.first(where: { $0.fullName == repo.fullName }) {
-                                        ciService.removeRepository(trackedRepo)
-                                    }
-                                } else {
-                                    await viewModel.addRepositoryToTrack(repo, to: ciService)
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
-        .padding(.vertical, 4)
     }
 }
 
@@ -230,7 +206,7 @@ struct ManualRepositoryRow: View {
     }
 }
 
-struct RepositoryRow: View {
+struct InstallationRepositoryRow: View {
     let repository: InstallationRepository
     let isTracked: Bool
     let onToggle: () -> Void
@@ -267,7 +243,6 @@ struct RepositoryRow: View {
             .controlSize(.small)
         }
         .padding(.vertical, 2)
-        .padding(.leading, 24)
     }
 }
 

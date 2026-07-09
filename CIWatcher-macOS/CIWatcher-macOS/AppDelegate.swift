@@ -33,8 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 })
             )
             
-            // Try to initialize GitHub App authentication
-            await initializeGitHubAppAuth()
+            await initializeGitHubAuth()
             
             // Start polling
             ciService.startPolling()
@@ -52,22 +51,57 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @MainActor
-    private func initializeGitHubAppAuth() async {
-        let config = GitHubAppConfig.default
-        guard config.hasPrivateKey() else {
+    private func initializeGitHubAuth() async {
+        guard ciService.usesBackendAuth || GitHubAppConfig.default.hasPrivateKey() else {
             return
         }
+
+        await ciService.migrateRepositoriesForBackendAuthIfNeeded()
         
         do {
-            try await ciService.updateAPIClient(config: config)
+            try await ciService.refreshAPIClient()
             
-            // If there are saved repositories, fetch their workflow runs
             if !ciService.repositories.isEmpty {
                 await ciService.fetchAllWorkflowRuns()
             }
         } catch {
             // Silently fail - user can configure in settings
         }
+    }
+    
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            handleIncomingURL(url)
+        }
+    }
+    
+    @MainActor
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "ciwatcher",
+              url.host == "auth",
+              url.path == "/callback" else {
+            return
+        }
+        
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        let queryItems = components?.queryItems ?? []
+        let success = queryItems.first(where: { $0.name == "success" })?.value == "1"
+        let error = queryItems.first(where: { $0.name == "error" })?.value
+        
+        var userInfo: [String: Any] = ["success": success]
+        if let error {
+            userInfo["error"] = error
+        }
+        NotificationCenter.default.post(name: .ciwatcherAuthCallback, object: nil, userInfo: userInfo)
+        
+        if success {
+            Task {
+                await ciService.migrateRepositoriesForBackendAuthIfNeeded()
+                try? await ciService.refreshAPIClient()
+            }
+        }
+        
+        openSettings()
     }
     
     func openSettings() {
@@ -85,4 +119,3 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 }
-

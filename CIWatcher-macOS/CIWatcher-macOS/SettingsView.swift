@@ -42,6 +42,14 @@ struct SettingsView: View {
                 }
         }
         .frame(width: 600, height: 500)
+        .onAppear {
+            viewModel.ciServiceRefreshCallback = {
+                try? await ciService.refreshAPIClient()
+                if !ciService.repositories.isEmpty {
+                    await ciService.fetchAllWorkflowRuns()
+                }
+            }
+        }
     }
 }
 

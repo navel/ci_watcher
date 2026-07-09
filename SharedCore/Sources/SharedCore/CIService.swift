@@ -16,12 +16,14 @@ public class CIService: ObservableObject {
     
     private var apiClient: GitHubAPIClient?
     private let publicAPIClient = GitHubAPIClient.publicAccess
+    private let backendAuthClient: BackendAuthClient?
     private var pollingTimer: Timer?
     private let pollingInterval: TimeInterval = 60.0 // 60 seconds
     private let repositoriesKey = "CIWatcher.TrackedRepositories"
     private var workflowRunsPage: [CIRepository.ID: Int] = [:]
     
-    public init() {
+    public init(backendAuthClient: BackendAuthClient? = nil) {
+        self.backendAuthClient = backendAuthClient ?? BackendAuthClient.makeDefault()
         loadRepositories()
     }
     
@@ -41,6 +43,104 @@ public class CIService: ObservableObject {
             installationID: installationID
         )
         self.apiClient = client
+    }
+
+    public func updateAPIClientFromBackend() async throws {
+        guard let backendAuthClient else {
+            throw BackendAuthError.invalidURL
+        }
+
+        let credentials = DeviceCredentials.loadOrCreate()
+        let tokenResponse = try await backendAuthClient.fetchInstallationToken(credentials: credentials)
+        self.apiClient = GitHubAPIClient(token: tokenResponse.token)
+    }
+
+    public func refreshAPIClient() async throws {
+        if backendAuthClient != nil {
+            try await updateAPIClientFromBackend()
+            return
+        }
+
+        let config = GitHubAppConfig.default
+        guard config.hasPrivateKey() else {
+            throw BackendAuthError.notConnected
+        }
+        try await updateAPIClient(config: config)
+    }
+
+    public var usesBackendAuth: Bool {
+        backendAuthClient != nil
+    }
+
+    /// One-time cleanup after switching to backend auth.
+    /// Removes installation repos from other users and private repos without access.
+    public func migrateRepositoriesForBackendAuthIfNeeded() async {
+        guard usesBackendAuth, RepositoryMigration.needsMigration() else {
+            return
+        }
+
+        var accessibleInstallationFullNames: Set<String> = []
+        var isGitHubConnected = false
+        var manualPrivateRepoHasAccess: Set<UUID> = []
+
+        if let backendAuthClient {
+            let credentials = DeviceCredentials.loadOrCreate()
+            do {
+                let status = try await backendAuthClient.fetchConnectionStatus(credentials: credentials)
+                isGitHubConnected = status.connected
+
+                if isGitHubConnected {
+                    try await updateAPIClientFromBackend()
+                    if let client = apiClient {
+                        let response = try await client.getInstallationRepositories()
+                        accessibleInstallationFullNames = Set(
+                            response.repositories.map { $0.fullName.lowercased() }
+                        )
+                    }
+
+                    manualPrivateRepoHasAccess = await accessibleManualPrivateRepositoryIDs()
+                }
+            } catch {
+                isGitHubConnected = false
+            }
+        }
+
+        let repositoriesToRemove = RepositoryMigration.repositoriesToRemove(
+            from: repositories,
+            accessibleInstallationFullNames: accessibleInstallationFullNames,
+            isGitHubConnected: isGitHubConnected,
+            manualPrivateRepoHasAccess: manualPrivateRepoHasAccess
+        )
+
+        for repository in repositoriesToRemove {
+            removeRepository(repository)
+        }
+
+        RepositoryMigration.markCompleted()
+    }
+
+    private func accessibleManualPrivateRepositoryIDs() async -> Set<UUID> {
+        guard let client = apiClient else {
+            return []
+        }
+
+        var accessibleIDs: Set<UUID> = []
+        let privateManualRepositories = repositories.filter { $0.source == .manual && $0.isPrivate }
+
+        for repository in privateManualRepositories {
+            do {
+                _ = try await client.getWorkflowRuns(
+                    owner: repository.owner,
+                    repo: repository.name,
+                    perPage: 1
+                )
+                accessibleIDs.insert(repository.id)
+            } catch {
+                continue
+            }
+        }
+
+        return accessibleIDs
     }
     
     // MARK: - Repository Management
@@ -165,13 +265,10 @@ public class CIService: ObservableObject {
         
         // Refresh API client to get a new installation token
         // Installation tokens expire after 1 hour, so we refresh before each fetch
-        let config = GitHubAppConfig.default
-        if config.hasPrivateKey() {
-            do {
-                try await updateAPIClient(config: config)
-            } catch {
-                // Continue with existing client, it might still be valid
-            }
+        do {
+            try await refreshAPIClient()
+        } catch {
+            // Continue with existing client, it might still be valid
         }
         
         isLoading = true
