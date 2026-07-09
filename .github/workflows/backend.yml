@@ -58,4 +58,4 @@ jobs:
         run: go mod download
 
       - name: Build Docker image
-        run: docker build -t ciwatcher-api:test backend
+        run: docker build -t ciwatcher-api:test .

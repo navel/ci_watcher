@@ -42,7 +42,8 @@ jobs:
           GITHUB_APP_ID: ${{ secrets.CIWATCHER_APP_ID }}
           GITHUB_CLIENT_ID: ${{ secrets.CIWATCHER_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.CIWATCHER_CLIENT_SECRET }}
-          GITHUB_PRIVATE_KEY_BASE64: ${{ secrets.CIWATCHER_PRIVATE_KEY_BASE64 }}
+          CIWATCHER_API_BASE_URL: https://ciwatcher-api.fly.dev
+          GITHUB_PRIVATE_KEY: ""
           SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
           VERSION: ${{ github.ref_name }}
           BUILD_NUMBER: ${{ github.run_number }}
