@@ -22,6 +22,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hide dock icon for menu bar app
         NSApp.setActivationPolicy(.accessory)
         
+        // Register app icon for Notification Center (accessory apps don't get it automatically)
+        NSApp.applicationIconImage = NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath)
+        
         Task { @MainActor in
             // Request notification permissions
             _ = await NotificationEngine.shared.requestAuthorization()
