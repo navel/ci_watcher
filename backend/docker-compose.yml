@@ -1,19 +1,36 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ciwatcher
+      POSTGRES_PASSWORD: ciwatcher
+      POSTGRES_DB: ciwatcher
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ciwatcher -d ciwatcher"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   api:
     build: .
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       PORT: "8080"
       BASE_URL: "http://localhost:8080"
       APP_URL_SCHEME: "ciwatcher"
-      SQLITE_PATH: "/data/ciwatcher.db"
+      DATABASE_URL: "postgres://ciwatcher:ciwatcher@postgres:5432/ciwatcher?sslmode=disable"
       GITHUB_APP_ID: "${GITHUB_APP_ID}"
       GITHUB_APP_SLUG: "${GITHUB_APP_SLUG:-ciwatcher-native}"
       GITHUB_CLIENT_ID: "${GITHUB_CLIENT_ID:-}"
       GITHUB_PRIVATE_KEY: "${GITHUB_PRIVATE_KEY}"
-    volumes:
-      - api_data:/data
 
 volumes:
-  api_data:
+  postgres_data:

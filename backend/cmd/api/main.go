@@ -29,7 +29,7 @@ func main() {
 
 	ctx := context.Background()
 
-	db, err := store.New(ctx, cfg.DatabasePath)
+	db, err := store.New(ctx, cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("database: %v", err)
 	}

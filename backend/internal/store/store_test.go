@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -10,19 +11,35 @@ import (
 	"github.com/navel/ci_watcher/backend/internal/store"
 )
 
-func TestStoreDeviceLifecycle(t *testing.T) {
-	ctx := context.Background()
-	dbPath := t.TempDir() + "/test.db"
+func testStore(t *testing.T) *store.Store {
+	t.Helper()
 
-	db, err := store.New(ctx, dbPath)
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		t.Skip("DATABASE_URL not set")
+	}
+
+	ctx := context.Background()
+	db, err := store.New(ctx, databaseURL)
 	if err != nil {
 		t.Fatalf("new store: %v", err)
 	}
-	defer db.Close()
+	t.Cleanup(func() { db.Close() })
 
 	if err := migrate.Up(ctx, db.DB()); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
+
+	if _, err := db.DB().ExecContext(ctx, "TRUNCATE oauth_states, devices RESTART IDENTITY CASCADE"); err != nil {
+		t.Fatalf("truncate tables: %v", err)
+	}
+
+	return db
+}
+
+func TestStoreDeviceLifecycle(t *testing.T) {
+	ctx := context.Background()
+	db := testStore(t)
 
 	deviceID := uuid.New()
 	if err := db.UpsertDevice(ctx, deviceID, "hash"); err != nil {
@@ -52,17 +69,7 @@ func TestStoreDeviceLifecycle(t *testing.T) {
 
 func TestConsumeOAuthState(t *testing.T) {
 	ctx := context.Background()
-	dbPath := t.TempDir() + "/test.db"
-
-	db, err := store.New(ctx, dbPath)
-	if err != nil {
-		t.Fatalf("new store: %v", err)
-	}
-	defer db.Close()
-
-	if err := migrate.Up(ctx, db.DB()); err != nil {
-		t.Fatalf("migrate: %v", err)
-	}
+	db := testStore(t)
 
 	deviceID := uuid.New()
 	if err := db.UpsertDevice(ctx, deviceID, "hash"); err != nil {

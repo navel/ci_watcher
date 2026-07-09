@@ -91,7 +91,7 @@ CIWATCHER_RUN_INTEGRATION_TESTS=1 swift test --filter Integration
 
 ## Backend API (local)
 
-See [backend/README.md](backend/README.md) for full API docs and Fly.io deployment.
+See [backend/README.md](backend/README.md) for full API docs and VPS deployment.
 
 ```bash
 cd backend
@@ -112,8 +112,8 @@ Set `CIWATCHER_API_BASE_URL` in `Secrets.xcconfig`.
 **Important:** `.xcconfig` treats `//` as a comment, so URLs must use this syntax:
 
 ```text
-# Production (Fly.io)
-CIWATCHER_API_BASE_URL = https:/$()/ciwatcher-api.fly.dev
+# Production (ciwatcher.navel.uk)
+CIWATCHER_API_BASE_URL = https:/$()/ciwatcher.navel.uk
 
 # Local backend (docker compose up in backend/)
 CIWATCHER_API_BASE_URL = http:/$()/localhost:8080

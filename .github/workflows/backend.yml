@@ -6,11 +6,13 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/backend.yml"
+      - ".github/workflows/backend-deploy.yml"
   pull_request:
     branches: [main]
     paths:
       - "backend/**"
       - ".github/workflows/backend.yml"
+      - ".github/workflows/backend-deploy.yml"
 
 defaults:
   run:
@@ -19,6 +21,21 @@ defaults:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ciwatcher
+          POSTGRES_PASSWORD: ciwatcher
+          POSTGRES_DB: ciwatcher
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ciwatcher -d ciwatcher"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +50,7 @@ jobs:
 
       - name: Run tests
         env:
-          SQLITE_PATH: /tmp/ciwatcher-test.db
+          DATABASE_URL: postgres://ciwatcher:ciwatcher@localhost:5432/ciwatcher?sslmode=disable
           BASE_URL: http://localhost:8080
           GITHUB_APP_ID: "123"
           GITHUB_PRIVATE_KEY: "placeholder"

@@ -1,0 +1,48 @@
+name: Backend Deploy
+
+on:
+  workflow_run:
+    workflows: [Backend CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_HOST: ${{ secrets.CIWATCHER_DEPLOY_HOST }}
+          SSH_KEY: ${{ secrets.CIWATCHER_DEPLOY_SSH_KEY }}
+        run: |
+          if [[ -z "$SSH_HOST" || -z "$SSH_KEY" ]]; then
+            echo "Missing CIWATCHER_DEPLOY_HOST or CIWATCHER_DEPLOY_SSH_KEY repository secrets." >&2
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          host_part="${SSH_HOST#*@}"
+          ssh-keyscan -H "$host_part" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy to VPS
+        env:
+          CIWATCHER_DEPLOY_HOST: ${{ secrets.CIWATCHER_DEPLOY_HOST }}
+          CIWATCHER_DEPLOY_SSH_KEY_FILE: ~/.ssh/deploy_key
+          CIWATCHER_DEPLOY_HEALTH_URL: https://ciwatcher.navel.uk/health
+        run: |
+          chmod +x backend/deploy/deploy.sh
+          backend/deploy/deploy.sh --host "$CIWATCHER_DEPLOY_HOST"

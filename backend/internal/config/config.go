@@ -10,7 +10,7 @@ type Config struct {
 	Port             string
 	BaseURL          string
 	AppURLScheme     string
-	DatabasePath     string
+	DatabaseURL      string
 	GitHubAppID      string
 	GitHubAppSlug    string
 	GitHubClientID   string
@@ -22,7 +22,7 @@ func Load() (Config, error) {
 		Port:             envOrDefault("PORT", "8080"),
 		BaseURL:          strings.TrimRight(os.Getenv("BASE_URL"), "/"),
 		AppURLScheme:     envOrDefault("APP_URL_SCHEME", "ciwatcher"),
-		DatabasePath:     envOrDefault("SQLITE_PATH", "./data/ciwatcher.db"),
+		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		GitHubAppID:      os.Getenv("GITHUB_APP_ID"),
 		GitHubAppSlug:    envOrDefault("GITHUB_APP_SLUG", "ciwatcher-native"),
 		GitHubClientID:   os.Getenv("GITHUB_CLIENT_ID"),
@@ -31,6 +31,9 @@ func Load() (Config, error) {
 
 	if cfg.BaseURL == "" {
 		return cfg, fmt.Errorf("BASE_URL is required")
+	}
+	if cfg.DatabaseURL == "" {
+		return cfg, fmt.Errorf("DATABASE_URL is required")
 	}
 	if cfg.GitHubAppID == "" {
 		return cfg, fmt.Errorf("GITHUB_APP_ID is required")

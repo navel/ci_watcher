@@ -1,0 +1,46 @@
+services:
+  ciwatcher-postgres:
+    container_name: ciwatcher-postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    container_name: ciwatcher-api
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ciwatcher-postgres:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      BASE_URL: ${BASE_URL}
+      APP_URL_SCHEME: ${APP_URL_SCHEME:-ciwatcher}
+      DATABASE_URL: ${DATABASE_URL}
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      GITHUB_APP_SLUG: ${GITHUB_APP_SLUG:-ciwatcher-native}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_PRIVATE_KEY: ${GITHUB_PRIVATE_KEY}
+    networks:
+      - default
+      - content_maker_network
+
+volumes:
+  postgres_data:
+
+networks:
+  content_maker_network:
+    external: true
+    name: content_maker_content_maker_network

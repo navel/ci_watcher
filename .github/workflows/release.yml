@@ -42,7 +42,7 @@ jobs:
           GITHUB_APP_ID: ${{ secrets.CIWATCHER_APP_ID }}
           GITHUB_CLIENT_ID: ${{ secrets.CIWATCHER_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.CIWATCHER_CLIENT_SECRET }}
-          CIWATCHER_API_BASE_URL: https://ciwatcher-api.fly.dev
+          CIWATCHER_API_BASE_URL: https://ciwatcher.navel.uk
           GITHUB_PRIVATE_KEY: ""
           SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
           VERSION: ${{ github.ref_name }}

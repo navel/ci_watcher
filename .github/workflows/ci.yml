@@ -26,7 +26,7 @@ jobs:
         env:
           GITHUB_APP_ID: "0"
           GITHUB_CLIENT_ID: "placeholder"
-          CIWATCHER_API_BASE_URL: "https://ciwatcher-api.fly.dev"
+          CIWATCHER_API_BASE_URL: "https://ciwatcher.navel.uk"
           GITHUB_PRIVATE_KEY: ""
         run: |
           chmod +x scripts/ci/generate-secrets-xcconfig.sh
