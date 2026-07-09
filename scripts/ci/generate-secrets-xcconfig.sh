@@ -21,7 +21,8 @@ fi
 private_key="${GITHUB_PRIVATE_KEY:-${GITHUB_PRIVATE_KEY_BASE64:-}}"
 api_base_url="${CIWATCHER_API_BASE_URL:-}"
 if [[ -n "$api_base_url" ]]; then
-  api_base_url="${api_base_url//:\/\//:\$/()/}"
+  # xcconfig treats // as a comment; encode :// as :/$()/
+  api_base_url="$(printf '%s' "$api_base_url" | sed 's|://|:/$()/|')"
 fi
 
 cat > "$OUTPUT" <<EOF

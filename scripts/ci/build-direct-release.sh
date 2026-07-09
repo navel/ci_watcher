@@ -69,6 +69,15 @@ xcodebuild -exportArchive \
   -exportPath "$EXPORT_PATH" \
   -exportOptionsPlist /tmp/ExportOptions.plist
 
+if [[ -n "${CIWATCHER_API_BASE_URL:-}" ]]; then
+  ACTUAL_API_URL=$(/usr/libexec/PlistBuddy -c 'Print :CIWATCHER_API_BASE_URL' "$APP_PATH/Contents/Info.plist" 2>/dev/null || true)
+  if [[ "$ACTUAL_API_URL" != "$CIWATCHER_API_BASE_URL" ]]; then
+    echo "Error: Built CIWATCHER_API_BASE_URL is '$ACTUAL_API_URL', expected '$CIWATCHER_API_BASE_URL'" >&2
+    exit 1
+  fi
+  echo "Verified CIWATCHER_API_BASE_URL: $ACTUAL_API_URL"
+fi
+
 # Verify signature
 codesign --verify --deep --strict "$APP_PATH"
 spctl --assess --type execute "$APP_PATH" || true
