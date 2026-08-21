@@ -104,6 +104,53 @@ final class SharedCoreTests: XCTestCase {
         XCTAssertEqual(latest.map(\.id).sorted(), [1, 2])
     }
     
+    func testSortRepositoriesForDisplayPrioritizesFailedAndRunning() {
+        let repoA = CIRepository(owner: "octocat", name: "a", isPrivate: false)
+        let repoB = CIRepository(owner: "octocat", name: "b", isPrivate: false)
+        let repoC = CIRepository(owner: "octocat", name: "c", isPrivate: false)
+        let repoD = CIRepository(owner: "octocat", name: "d", isPrivate: false)
+        
+        let repositories = [repoA, repoB, repoC, repoD]
+        let workflowRuns: [CIRepository.ID: [WorkflowRun]] = [
+            repoA.id: [
+                WorkflowRun(id: 1, name: "Fine", workflowName: "CI", status: "completed", conclusion: "success", createdAt: Date()),
+            ],
+            repoB.id: [
+                WorkflowRun(id: 2, name: "Broken", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+            ],
+            repoC.id: [
+                WorkflowRun(id: 3, name: "Running", workflowName: "CI", status: "in_progress", conclusion: nil, createdAt: Date()),
+            ],
+            repoD.id: [
+                WorkflowRun(id: 4, name: "Queued", workflowName: "CI", status: "queued", conclusion: nil, createdAt: Date()),
+            ],
+        ]
+        
+        let sorted = CIService.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
+        
+        XCTAssertEqual(sorted.map(\.name), ["b", "c", "d", "a"])
+    }
+    
+    func testSortRepositoriesForDisplayPreservesOrderWithinSamePriority() {
+        let repoA = CIRepository(owner: "octocat", name: "a", isPrivate: false)
+        let repoB = CIRepository(owner: "octocat", name: "b", isPrivate: false)
+        let repoC = CIRepository(owner: "octocat", name: "c", isPrivate: false)
+        
+        let repositories = [repoA, repoB, repoC]
+        let workflowRuns: [CIRepository.ID: [WorkflowRun]] = [
+            repoA.id: [
+                WorkflowRun(id: 1, name: "Broken A", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+            ],
+            repoB.id: [
+                WorkflowRun(id: 2, name: "Broken B", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+            ],
+        ]
+        
+        let sorted = CIService.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
+        
+        XCTAssertEqual(sorted.map(\.name), ["a", "b", "c"])
+    }
+    
     func testOverallStatusIgnoresOlderFailures() {
         let repoID = CIRepository(owner: "octocat", name: "hello-world", isPrivate: false).id
         let runs: [CIRepository.ID: [WorkflowRun]] = [

@@ -11,6 +11,7 @@ public class CIService: ObservableObject {
     @Published public private(set) var loadingMoreRepositoryIDs: Set<CIRepository.ID> = []
     @Published public private(set) var isLoading: Bool = false
     @Published public private(set) var lastError: Error?
+    @Published public private(set) var menuBarStatusEmoji: String = "⚪"
     
     public static let workflowRunsPageSize = 5
     
@@ -214,6 +215,7 @@ public class CIService: ObservableObject {
         loadingMoreRepositoryIDs.remove(repository.id)
         workflowJobs = workflowJobs.filter { $0.key.repositoryId != repository.id }
         saveRepositories()
+        refreshMenuBarStatusEmoji()
     }
     
     // MARK: - Persistence
@@ -260,6 +262,7 @@ public class CIService: ObservableObject {
     
     public func fetchAllWorkflowRuns() async {
         guard !repositories.isEmpty else {
+            refreshMenuBarStatusEmoji()
             return
         }
         
@@ -300,6 +303,7 @@ public class CIService: ObservableObject {
         }
         
         isLoading = false
+        refreshMenuBarStatusEmoji()
     }
     
     public func fetchWorkflowRuns(for repository: CIRepository) async {
@@ -329,6 +333,7 @@ public class CIService: ObservableObject {
         }
         
         isLoading = false
+        refreshMenuBarStatusEmoji()
     }
     
     public func hasMoreWorkflowRuns(for repository: CIRepository) -> Bool {
@@ -375,6 +380,7 @@ public class CIService: ObservableObject {
         workflowRuns[repository.id] = response.workflowRuns
         workflowRunsPage[repository.id] = page
         workflowRunsHasMore[repository.id] = response.workflowRuns.count < response.totalCount
+        refreshMenuBarStatusEmoji()
     }
     
     // MARK: - Workflow Jobs
@@ -423,9 +429,45 @@ public class CIService: ObservableObject {
     }
     
     // MARK: - Status Helpers
+
+    /// Repositories sorted for the menu: failed and running projects first, stable order otherwise.
+    public var displayRepositories: [CIRepository] {
+        Self.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
+    }
     
     public func overallStatus() -> String {
         Self.computeOverallStatus(from: workflowRuns)
+    }
+    
+    /// Higher values mean the repository should appear closer to the top of the list.
+    nonisolated static func repositoryAttentionLevel(from runs: [WorkflowRun]) -> Int {
+        var level = 0
+        
+        for run in runs.latestPerWorkflow() {
+            if run.displayStatus == "failure" {
+                return 2
+            }
+            if run.status == "in_progress" || run.status == "queued" {
+                level = max(level, 1)
+            }
+        }
+        
+        return level
+    }
+    
+    /// Sorts repositories so ones with failed or running workflows appear first.
+    nonisolated static func sortRepositoriesForDisplay(
+        _ repositories: [CIRepository],
+        workflowRuns: [CIRepository.ID: [WorkflowRun]]
+    ) -> [CIRepository] {
+        repositories.enumerated().sorted { lhs, rhs in
+            let lhsLevel = repositoryAttentionLevel(from: workflowRuns[lhs.element.id] ?? [])
+            let rhsLevel = repositoryAttentionLevel(from: workflowRuns[rhs.element.id] ?? [])
+            if lhsLevel != rhsLevel {
+                return lhsLevel > rhsLevel
+            }
+            return lhs.offset < rhs.offset
+        }.map(\.element)
     }
     
     /// Computes aggregate status from the latest run of each workflow per repository.
@@ -464,6 +506,13 @@ public class CIService: ObservableObject {
             return "🟢"
         default:
             return "⚪"
+        }
+    }
+    
+    private func refreshMenuBarStatusEmoji() {
+        let emoji = statusEmoji()
+        if menuBarStatusEmoji != emoji {
+            menuBarStatusEmoji = emoji
         }
     }
 }

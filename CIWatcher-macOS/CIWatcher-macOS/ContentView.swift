@@ -68,7 +68,7 @@ struct ContentView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(ciService.repositories) { repository in
+                        ForEach(ciService.displayRepositories) { repository in
                             RepositoryView(
                                 ciService: ciService,
                                 repository: repository,

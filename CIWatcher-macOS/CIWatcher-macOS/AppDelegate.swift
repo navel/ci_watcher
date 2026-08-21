@@ -7,12 +7,14 @@
 
 import AppKit
 import SwiftUI
+import Combine
 import SharedCore
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController?
     private(set) var updaterController: UpdaterController? = UpdaterController()
     @MainActor var ciService: CIService = CIService()
+    private var cancellables = Set<AnyCancellable>()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize status bar
@@ -41,15 +43,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Start polling
             ciService.startPolling()
             
-            // Update status bar emoji periodically
-            let statusTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-                Task { @MainActor [weak self] in
-                    guard let service = self?.ciService,
-                          let statusBar = self?.statusBarController else { return }
-                    statusBar.updateStatusEmoji(service.statusEmoji())
+            ciService.$menuBarStatusEmoji
+                .receive(on: RunLoop.main)
+                .sink { [weak statusBar] emoji in
+                    statusBar?.updateStatusEmoji(emoji)
                 }
-            }
-            RunLoop.main.add(statusTimer, forMode: .common)
+                .store(in: &cancellables)
+            
+            statusBar.updateStatusEmoji(ciService.menuBarStatusEmoji)
         }
     }
     
