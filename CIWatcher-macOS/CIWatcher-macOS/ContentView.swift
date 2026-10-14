@@ -168,6 +168,27 @@ struct RepositoryView: View {
     }
 }
 
+struct WorkflowRunTimingLabels: View {
+    let run: WorkflowRun
+    
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 1) {
+            if run.usesRelativeStartLabel() {
+                Text(run.startTime, style: .relative)
+            } else {
+                Text(run.formattedAbsoluteStartLabel())
+            }
+            if let duration = run.formattedDuration() {
+                Text(duration)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .font(.caption)
+        .foregroundColor(.secondary)
+        .multilineTextAlignment(.trailing)
+    }
+}
+
 struct WorkflowRunRow: View {
     @ObservedObject var ciService: CIService
     let repository: CIRepository
@@ -200,9 +221,7 @@ struct WorkflowRunRow: View {
                     
                     Spacer(minLength: 8)
                     
-                    Text(run.createdAt, style: .relative)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    WorkflowRunTimingLabels(run: run)
                 }
                 .contentShape(Rectangle())
             }

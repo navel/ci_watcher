@@ -430,7 +430,7 @@ public class CIService: ObservableObject {
     
     // MARK: - Status Helpers
 
-    /// Repositories sorted for the menu: failed and running projects first, stable order otherwise.
+    /// Repositories sorted by most recent workflow activity first.
     public var displayRepositories: [CIRepository] {
         Self.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
     }
@@ -455,17 +455,32 @@ public class CIService: ObservableObject {
         return level
     }
     
-    /// Sorts repositories so ones with failed or running workflows appear first.
+    /// Newest workflow activity first; repositories without runs keep their relative order at the bottom.
+    nonisolated static func latestWorkflowActivityDate(from runs: [WorkflowRun]) -> Date? {
+        runs.map(\.createdAt).max()
+    }
+    
     nonisolated static func sortRepositoriesForDisplay(
         _ repositories: [CIRepository],
         workflowRuns: [CIRepository.ID: [WorkflowRun]]
     ) -> [CIRepository] {
         repositories.enumerated().sorted { lhs, rhs in
-            let lhsLevel = repositoryAttentionLevel(from: workflowRuns[lhs.element.id] ?? [])
-            let rhsLevel = repositoryAttentionLevel(from: workflowRuns[rhs.element.id] ?? [])
-            if lhsLevel != rhsLevel {
-                return lhsLevel > rhsLevel
+            let lhsDate = latestWorkflowActivityDate(from: workflowRuns[lhs.element.id] ?? [])
+            let rhsDate = latestWorkflowActivityDate(from: workflowRuns[rhs.element.id] ?? [])
+            
+            switch (lhsDate, rhsDate) {
+            case let (left?, right?):
+                if left != right {
+                    return left > right
+                }
+            case (nil, .some):
+                return false
+            case (.some, nil):
+                return true
+            case (nil, nil):
+                break
             }
+            
             return lhs.offset < rhs.offset
         }.map(\.element)
     }

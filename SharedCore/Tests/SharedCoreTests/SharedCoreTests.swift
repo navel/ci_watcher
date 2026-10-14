@@ -104,7 +104,8 @@ final class SharedCoreTests: XCTestCase {
         XCTAssertEqual(latest.map(\.id).sorted(), [1, 2])
     }
     
-    func testSortRepositoriesForDisplayPrioritizesFailedAndRunning() {
+    func testSortRepositoriesForDisplayOrdersByLatestWorkflowActivity() {
+        let now = Date()
         let repoA = CIRepository(owner: "octocat", name: "a", isPrivate: false)
         let repoB = CIRepository(owner: "octocat", name: "b", isPrivate: false)
         let repoC = CIRepository(owner: "octocat", name: "c", isPrivate: false)
@@ -113,25 +114,44 @@ final class SharedCoreTests: XCTestCase {
         let repositories = [repoA, repoB, repoC, repoD]
         let workflowRuns: [CIRepository.ID: [WorkflowRun]] = [
             repoA.id: [
-                WorkflowRun(id: 1, name: "Fine", workflowName: "CI", status: "completed", conclusion: "success", createdAt: Date()),
+                WorkflowRun(
+                    id: 1,
+                    name: "Old",
+                    workflowName: "CI",
+                    status: "completed",
+                    conclusion: "success",
+                    createdAt: now.addingTimeInterval(-7200)
+                ),
             ],
             repoB.id: [
-                WorkflowRun(id: 2, name: "Broken", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+                WorkflowRun(
+                    id: 2,
+                    name: "Newest",
+                    workflowName: "CI",
+                    status: "completed",
+                    conclusion: "failure",
+                    createdAt: now
+                ),
             ],
             repoC.id: [
-                WorkflowRun(id: 3, name: "Running", workflowName: "CI", status: "in_progress", conclusion: nil, createdAt: Date()),
-            ],
-            repoD.id: [
-                WorkflowRun(id: 4, name: "Queued", workflowName: "CI", status: "queued", conclusion: nil, createdAt: Date()),
+                WorkflowRun(
+                    id: 3,
+                    name: "Middle",
+                    workflowName: "CI",
+                    status: "in_progress",
+                    conclusion: nil,
+                    createdAt: now.addingTimeInterval(-600)
+                ),
             ],
         ]
         
         let sorted = CIService.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
         
-        XCTAssertEqual(sorted.map(\.name), ["b", "c", "d", "a"])
+        XCTAssertEqual(sorted.map(\.name), ["b", "c", "a", "d"])
     }
     
-    func testSortRepositoriesForDisplayPreservesOrderWithinSamePriority() {
+    func testSortRepositoriesForDisplayPreservesOrderWhenActivityMatches() {
+        let now = Date()
         let repoA = CIRepository(owner: "octocat", name: "a", isPrivate: false)
         let repoB = CIRepository(owner: "octocat", name: "b", isPrivate: false)
         let repoC = CIRepository(owner: "octocat", name: "c", isPrivate: false)
@@ -139,16 +159,96 @@ final class SharedCoreTests: XCTestCase {
         let repositories = [repoA, repoB, repoC]
         let workflowRuns: [CIRepository.ID: [WorkflowRun]] = [
             repoA.id: [
-                WorkflowRun(id: 1, name: "Broken A", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+                WorkflowRun(
+                    id: 1,
+                    name: "A",
+                    workflowName: "CI",
+                    status: "completed",
+                    conclusion: "failure",
+                    createdAt: now
+                ),
             ],
             repoB.id: [
-                WorkflowRun(id: 2, name: "Broken B", workflowName: "CI", status: "completed", conclusion: "failure", createdAt: Date()),
+                WorkflowRun(
+                    id: 2,
+                    name: "B",
+                    workflowName: "CI",
+                    status: "completed",
+                    conclusion: "failure",
+                    createdAt: now
+                ),
             ],
         ]
         
         let sorted = CIService.sortRepositoriesForDisplay(repositories, workflowRuns: workflowRuns)
         
         XCTAssertEqual(sorted.map(\.name), ["a", "b", "c"])
+    }
+    
+    func testWorkflowRunStartLabelUsesRelativeWithinSixHours() {
+        let now = Date()
+        let run = WorkflowRun(
+            id: 1,
+            name: "Recent",
+            workflowName: "CI",
+            status: "completed",
+            conclusion: "success",
+            createdAt: now.addingTimeInterval(-3600)
+        )
+        
+        XCTAssertTrue(run.usesRelativeStartLabel(relativeTo: now))
+    }
+    
+    func testWorkflowRunStartLabelUsesAbsoluteAfterSixHours() {
+        let now = Date()
+        let run = WorkflowRun(
+            id: 1,
+            name: "Old",
+            workflowName: "CI",
+            status: "completed",
+            conclusion: "success",
+            createdAt: now.addingTimeInterval(-7 * 3600)
+        )
+        
+        XCTAssertFalse(run.usesRelativeStartLabel(relativeTo: now))
+        XCTAssertFalse(run.formattedAbsoluteStartLabel().isEmpty)
+    }
+    
+    func testWorkflowRunDurationForCompletedRun() {
+        let start = Date()
+        let end = start.addingTimeInterval(125)
+        let run = WorkflowRun(
+            id: 1,
+            name: "Done",
+            workflowName: "CI",
+            status: "completed",
+            conclusion: "success",
+            createdAt: start,
+            updatedAt: end
+        )
+        
+        XCTAssertEqual(run.formattedDuration(relativeTo: end), "2m 5s")
+    }
+    
+    func testWorkflowRunAPIDecodingIncludesTimingFields() throws {
+        let json = """
+        {
+          "id": 99,
+          "name": "CI",
+          "display_title": "Fix build",
+          "status": "completed",
+          "conclusion": "success",
+          "created_at": "2026-03-20T10:00:00Z",
+          "updated_at": "2026-03-20T10:05:30Z",
+          "run_started_at": "2026-03-20T10:00:15Z"
+        }
+        """
+        
+        let api = try JSONDecoder().decode(WorkflowRunAPI.self, from: Data(json.utf8))
+        let run = try XCTUnwrap(api.toWorkflowRun())
+        
+        XCTAssertEqual(run.name, "Fix build")
+        XCTAssertEqual(run.formattedDuration(relativeTo: run.updatedAt), "5m 15s")
     }
     
     func testOverallStatusIgnoresOlderFailures() {
